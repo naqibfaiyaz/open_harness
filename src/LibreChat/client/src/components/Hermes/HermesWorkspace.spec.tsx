@@ -75,6 +75,7 @@ it('waits for the authenticated grant before mounting the Hermes UI', async () =
 it('switches Hermes profiles and publishes the selected profile', async () => {
   workspace();
   await screen.findByTitle('com_hermes_workspace');
+  expect(document.querySelector('header')).not.toBeInTheDocument();
   fireEvent.change(screen.getByRole('combobox'), { target: { value: 'research' } });
   expect(screen.getByTitle('com_hermes_workspace')).toHaveAttribute(
     'src',

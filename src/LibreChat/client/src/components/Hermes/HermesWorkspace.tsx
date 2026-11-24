@@ -2,29 +2,21 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@librechat/client';
 import { useSearchParams } from 'react-router-dom';
 import { hermesSections } from 'librechat-data-provider';
-import {
-  useHermesProfiles,
-  useHermesSession,
-  useHermesStatus,
-  usePublishHermesProfile,
-} from './queries';
+import { useHermesSession, useHermesStatus } from './queries';
 import { useLocalize } from '~/hooks';
 
 /** Stock Hermes controls, embedded behind LibreChat's auth gate; no second agent definition store. */
 export default function HermesWorkspace() {
   const localize = useLocalize();
   const status = useHermesStatus();
-  const profiles = useHermesProfiles(status.data?.canManage === true);
   const session = useHermesSession();
-  const publish = usePublishHermesProfile();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const section =
     hermesSections.find((item) => item.path === params.get('section')) ?? hermesSections[0];
-  const [profile, setProfile] = useState('default');
+  const profile = params.get('profile') || 'default';
   const [ready, setReady] = useState(false);
   const [frameLoaded, setFrameLoaded] = useState(false);
   const [frameError, setFrameError] = useState(false);
-  const [activeProfile, setActiveProfile] = useState('default');
   const frame = useRef<HTMLIFrameElement>(null);
   const [attempt, setAttempt] = useState(0);
   const mounted = useRef(true);
@@ -59,16 +51,27 @@ export default function HermesWorkspace() {
   useEffect(() => {
     // The stock dashboard also has a profile switcher. Publishing must follow its actual scope.
     const timer = setInterval(() => {
+      if (!frameLoaded) return;
       try {
         const current = frame.current?.contentWindow?.location.search;
-        if (current !== undefined)
-          setActiveProfile(new URLSearchParams(current).get('profile') || profile);
+        if (current !== undefined) {
+          const selected = new URLSearchParams(current).get('profile') || profile;
+          if (selected !== profile)
+            setParams(
+              (previous) => {
+                const next = new URLSearchParams(previous);
+                next.set('profile', selected);
+                return next;
+              },
+              { replace: true },
+            );
+        }
       } catch {
         /* A dashboard-owned OAuth popup may briefly navigate away from this origin. */
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [profile]);
+  }, [profile, setParams, frameLoaded]);
   if (status.isLoading)
     return (
       <p role="status" className="p-6">
@@ -87,49 +90,9 @@ export default function HermesWorkspace() {
   const src = `${status.data.workspacePath}${section.path}?profile=${encodeURIComponent(profile)}`;
   return (
     <section
-      className="bg-surface-primary text-text-primary flex h-full min-h-0 flex-col overflow-auto"
+      className="bg-surface-primary text-text-primary relative flex h-full min-h-0 flex-col overflow-hidden"
       data-private
     >
-      <header className="border-border-light space-y-3 border-b p-4">
-        <h1 className="text-lg font-semibold">{localize('com_hermes_workspace')}</h1>
-        <p className="sr-only">{localize('com_hermes_scope')}</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <label>
-            {localize('com_hermes_agents')}{' '}
-            <select
-              value={activeProfile}
-              onChange={(event) => {
-                setProfile(event.target.value);
-                setActiveProfile(event.target.value);
-              }}
-              className="border-border-light bg-surface-primary rounded border p-2"
-            >
-              {(profiles.data?.profiles ?? [{ name: 'default' }]).map((item) => (
-                <option key={item.name} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button
-            variant="outline"
-            onClick={() => void profiles.refetch()}
-            disabled={profiles.isFetching}
-          >
-            {localize('com_hermes_refresh')}
-          </Button>
-          <Button onClick={() => publish.mutate(activeProfile)} disabled={publish.isLoading}>
-            {localize('com_hermes_publish')}
-          </Button>
-        </div>
-        {profiles.isError && <p role="alert">{localize('com_hermes_unavailable')}</p>}
-        {publish.isError && <p role="alert">{localize('com_hermes_unavailable')}</p>}
-        {publish.data && (
-          <p role="status">
-            {localize(publish.data.ready ? 'com_hermes_published' : 'com_hermes_restart')}
-          </p>
-        )}
-      </header>
       {(session.isError || frameError) && (
         <div role="alert" className="p-4">
           <p>{localize('com_hermes_unavailable')}</p>
@@ -144,14 +107,14 @@ export default function HermesWorkspace() {
         </div>
       )}
       {!ready && !session.isError && (
-        <p role="status" className="p-3">
+        <p role="status" className="sr-only">
           {localize('com_hermes_loading')}
         </p>
       )}
       {ready && !frameError && (
         <>
           {!frameLoaded && (
-            <p role="status" className="p-3">
+            <p role="status" className="sr-only">
               {localize('com_hermes_loading')}
             </p>
           )}
@@ -161,7 +124,7 @@ export default function HermesWorkspace() {
             src={src}
             title={localize('com_hermes_workspace')}
             allowFullScreen
-            className="min-h-[32rem] w-full flex-1 border-0"
+            className="h-full min-h-0 w-full flex-1 border-0"
             referrerPolicy="same-origin"
             onError={() => setFrameError(true)}
             onLoad={() => {
