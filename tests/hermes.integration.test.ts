@@ -128,7 +128,7 @@ before(async () => {
   app.use('/api/hermes', bridge.api);
   app.use('/hermes-workspace', bridge.workspace);
   app.use(['/api/ask', '/api/agents/chat'], bridge.executionGuard);
-  app.post(['/api/ask', '/api/agents/chat'], (_req: any, res: any) => res.json({ ok: true }));
+  app.post(['/api/ask', '/api/agents/chat'], (req: any, res: any) => res.json({ ok: true, ephemeralAgent: req.body.ephemeralAgent }));
   bridge.attach(server);
 });
 after(async () => {
@@ -266,12 +266,13 @@ test('unified LibreChat chat transport strips local tools, skills, memory and ex
   const params: any = {
     req: { config: { config: { hermes: { enabled: true, managedOnly: true, endpointName: 'Hermes' } } } },
     endpointOption: { endpoint: 'Hermes' },
-    agent: { tools: ['execute_code'], tool_resources: { execute_code: {} }, agent_ids: ['native-child'] },
+    agent: { tools: ['execute_code'], tool_resources: { execute_code: {} }, agent_ids: ['native-child'], artifacts: 'default' },
     accessibleSkillIds: ['native-skill'], manualSkills: ['native-skill'], memoryAvailable: true,
     codeEnvAvailable: true, fileSearchAvailable: true, skillAuthoringAvailable: true,
   };
   const next = hermesTransportParams(params);
   assert.deepEqual(next.agent.tools, []); assert.deepEqual(next.agent.agent_ids, []);
+  assert.equal(next.agent.artifacts, 'default');
   assert.deepEqual(next.manualSkills, []); assert.deepEqual(next.accessibleSkillIds, []);
   assert.equal(next.memoryAvailable, false); assert.equal(next.codeEnvAvailable, false);
   assert.equal(next.fileSearchAvailable, false); assert.equal(next.skillAuthoringAvailable, false);
@@ -280,6 +281,18 @@ test('unified LibreChat chat transport strips local tools, skills, memory and ex
   assert.throws(() => hermesTransportParams(other), { code: 'HERMES_EXECUTION_REQUIRED' });
   const unmanaged = { ...other, req: { config: { config: {} } } };
   assert.equal(hermesTransportParams(unmanaged), unmanaged);
+});
+
+test('artifact presentation modes survive managed execution without enabling native tools', async () => {
+  for (const mode of ['default', 'shadcnui', 'custom', 'untrusted-mode']) {
+    const response = await fetch(`${origin}/api/ask`, { method: 'POST',
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: 'Hermes',
+        ephemeralAgent: { artifacts: mode, execute_code: true, mcp: ['native-server'] } }) });
+    const body = await response.json();
+    assert.equal(body.ephemeralAgent.artifacts, mode === 'untrusted-mode' ? '' : mode);
+    assert.equal(body.ephemeralAgent.execute_code, false);
+    assert.deepEqual(body.ephemeralAgent.mcp, []);
+  }
 });
 test('workspace grants expire, renew without accumulating, and revoke', () => {
   let now = 1000;

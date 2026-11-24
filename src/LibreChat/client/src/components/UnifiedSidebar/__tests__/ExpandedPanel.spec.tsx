@@ -3,6 +3,10 @@ import { RecoilRoot } from 'recoil';
 import { getDefaultStore } from 'jotai';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
+
+jest.mock('~/components/Hermes/queries', () => ({
+  useHermesStatus: () => ({ data: { enabled: false, canManage: false } }),
+}));
 import { MessagesSquare, NotebookPen } from 'lucide-react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

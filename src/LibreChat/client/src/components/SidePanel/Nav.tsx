@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { Spinner } from '@librechat/client';
+import { useLocation } from 'react-router-dom';
 import { EModelEndpoint } from 'librechat-data-provider';
 import type { NavLink } from '~/common';
+import HermesNavigation from '~/components/Hermes/HermesNavigation';
 import { useActivePanel, resolveActivePanel } from '~/Providers';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
@@ -18,8 +20,10 @@ function PanelLoading() {
 }
 
 export default function Nav({ links }: { links: NavLink[] }) {
+  const location = useLocation();
   const { active } = useActivePanel();
   const effectiveActive = resolveActivePanel(active, links);
+  if (location.pathname.startsWith('/hermes')) return <HermesNavigation />;
   return (
     <div
       className={cn(

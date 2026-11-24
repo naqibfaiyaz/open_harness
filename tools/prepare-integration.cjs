@@ -12,7 +12,7 @@ const operators = argument('--operators', '').split(',').map((s) => s.trim()).fi
 const config = JSON.parse(fs.readFileSync(path.join(directory, 'librechat.yaml'), 'utf8'));
 config.hermes = { enabled: true, managedOnly: true, publicOrigin: publicURL.origin,
   dashboardURL: 'http://hermes:9119', runtimeURL: 'http://hermes:8642', endpointName: 'Hermes', allowedUserIds: operators };
-config.endpoints = { agents: { capabilities: [], disableBuilder: true, allowedProviders: ['Hermes'] },
+config.endpoints = { agents: { capabilities: ['tools', 'artifacts'], disableBuilder: true, allowedProviders: ['Hermes'] },
   custom: [{ name: 'Hermes', apiKey: '${HERMES_BRIDGE_KEY}',
     baseURL: 'http://127.0.0.1:3080/api/hermes/runtime/v1',
     models: { default: ['Agent: default'], fetch: true },
@@ -28,6 +28,7 @@ config.interface = { ...config.interface,
   skills: { use: false, create: false, share: false },
   mcpServers: { use: false, create: false, share: false },
   memories: false, schedules: false,
+  sharedLinks: { create: true, share: true, public: true },
 };
 config.modelSpecs = { enforce: false, prioritize: false,
   list: [{ name: 'hermes-default', label: 'Hermes', showInMenu: false,
@@ -49,6 +50,8 @@ for (const [key, value] of Object.entries({ HOST: '0.0.0.0', PORT: '3080',
 for (const key of ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'CREDS_KEY', 'HERMES_API_KEY',
   'HERMES_BRIDGE_KEY', 'HERMES_DASHBOARD_BASIC_AUTH_PASSWORD']) set(key, randomBytes(32).toString('hex'));
 set('CREDS_IV', randomBytes(16).toString('hex'));
+set('ALLOW_SHARED_LINKS', 'true', true);
+set('ALLOW_SHARED_LINKS_PUBLIC', 'true', true);
 set('DOMAIN_CLIENT', publicURL.origin, true); set('DOMAIN_SERVER', publicURL.origin, true);
 set('LIBRECHAT_PUBLIC_HOST', publicURL.host, true);
 fs.writeFileSync(file, env.replace(/^\n/, ''), { mode: 0o600 });

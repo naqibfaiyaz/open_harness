@@ -12,6 +12,8 @@ async function check() {
     return r.json();
   });
   if (!status.enabled || !status.canManage || !status.managedOnly) throw new Error('Hermes management is not enabled for the administrator');
+  const startup = await fetch(`${url}/api/config`, { headers }).then((r) => r.json());
+  if (!startup.sharedLinksEnabled || !startup.publicSharedLinksEnabled) throw new Error('Artifact conversation sharing is not enabled');
   const session = await fetch(`${url}/hermes-workspace/_session`, { method: 'POST', headers: { ...headers, Origin: publicOrigin } });
   if (!session.ok) throw new Error(`Workspace sign-in failed: HTTP ${session.status}`);
   const cookie = session.headers.getSetCookie().map((c) => c.split(';')[0]).find((c) => c.startsWith('lc_hermes_workspace='));

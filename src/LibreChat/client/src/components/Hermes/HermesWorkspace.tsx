@@ -17,7 +17,7 @@ export default function HermesWorkspace() {
   const profiles = useHermesProfiles(status.data?.canManage === true);
   const session = useHermesSession();
   const publish = usePublishHermesProfile();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const section =
     hermesSections.find((item) => item.path === params.get('section')) ?? hermesSections[0];
   const [profile, setProfile] = useState('default');
@@ -92,7 +92,7 @@ export default function HermesWorkspace() {
     >
       <header className="border-border-light space-y-3 border-b p-4">
         <h1 className="text-lg font-semibold">{localize('com_hermes_workspace')}</h1>
-        <p className="text-text-secondary text-sm">{localize('com_hermes_scope')}</p>
+        <p className="sr-only">{localize('com_hermes_scope')}</p>
         <div className="flex flex-wrap items-center gap-3">
           <label>
             {localize('com_hermes_agents')}{' '}
@@ -129,18 +129,6 @@ export default function HermesWorkspace() {
             {localize(publish.data.ready ? 'com_hermes_published' : 'com_hermes_restart')}
           </p>
         )}
-        <nav aria-label={localize('com_hermes_workspace')} className="flex flex-wrap gap-2">
-          {hermesSections.map((item) => (
-            <Button
-              key={item.path}
-              variant="outline"
-              aria-pressed={section.path === item.path}
-              onClick={() => setParams({ section: item.path })}
-            >
-              {localize(item.key)}
-            </Button>
-          ))}
-        </nav>
       </header>
       {(session.isError || frameError) && (
         <div role="alert" className="p-4">

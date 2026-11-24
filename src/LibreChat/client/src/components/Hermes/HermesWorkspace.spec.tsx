@@ -1,6 +1,7 @@
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import HermesWorkspace from './HermesWorkspace';
+import HermesNavigation from './HermesNavigation';
 
 const mockRenew = jest.fn();
 const mockPublish = jest.fn();
@@ -44,6 +45,7 @@ function workspace(path = '/hermes') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <HermesWorkspace />
+      <HermesNavigation />
     </MemoryRouter>,
   );
 }
@@ -80,7 +82,7 @@ it('switches Hermes profiles and publishes the selected profile', async () => {
   );
   fireEvent.click(screen.getByText('com_hermes_publish'));
   expect(mockPublish).toHaveBeenCalledWith('research');
-  fireEvent.click(screen.getByText('com_hermes_mcp'));
+  fireEvent.click(screen.getByRole('link', { name: 'com_hermes_mcp' }));
   expect(screen.getByTitle('com_hermes_workspace')).toHaveAttribute(
     'src',
     '/hermes-workspace/mcp?profile=research',

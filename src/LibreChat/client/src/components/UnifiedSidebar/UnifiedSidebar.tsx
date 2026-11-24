@@ -79,6 +79,10 @@ function UnifiedSidebar({
   const isInsightsRoute = location.pathname.startsWith('/insights');
   const panelExpanded = expanded && !isInsightsRoute;
 
+  useEffect(() => {
+    if (!isSmallScreen && location.pathname.startsWith('/hermes')) setSidebarOpen(true);
+  }, [isSmallScreen, location.pathname, setSidebarOpen]);
+
   /** The aside's max width is a viewport percentage, so the announced range has to track
    *  the viewport rather than a render-time snapshot of it. */
   useEffect(() => {

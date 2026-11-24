@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { ArtifactModes } from 'librechat-data-provider';
 import type { Request, Response, RequestHandler } from 'express';
 import type { Server } from 'node:http';
 import type { HermesConfig, HermesSecrets, HermesUser } from './config';
@@ -246,6 +247,11 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     }
     // The server's custom endpoint configuration chooses the provider, never a client override.
     req.body.endpointType = 'custom';
+    // Artifacts format model output; they do not run a second tool loop.
+    const requestedArtifacts = req.body?.ephemeralAgent?.artifacts;
+    const artifacts = Object.values(ArtifactModes).includes(requestedArtifacts)
+      ? requestedArtifacts
+      : '';
     req.body.ephemeralAgent = {
       mcp: [],
       web_search: false,
@@ -256,7 +262,7 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
       ask_user_question: false,
       run_in_background: false,
       describe_intent: false,
-      artifacts: '',
+      artifacts,
     };
     next();
   };

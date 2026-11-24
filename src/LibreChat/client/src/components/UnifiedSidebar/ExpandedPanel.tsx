@@ -1,6 +1,6 @@
 import { memo, useCallback, Suspense } from 'react';
 import { SquarePen } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Skeleton, Sidebar, Button, TooltipAnchor } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { useShortcutAriaKey, useShortcutHint } from '~/hooks/useKeyboardShortcuts';
@@ -91,10 +91,9 @@ const NavIconButton = memo(function NavIconButton({
       if (!isActive) {
         setActive(link.id);
       }
+      onLeaveInsights?.();
       if (!expanded) {
         onExpand?.();
-      } else {
-        onLeaveInsights?.();
       }
     },
     [link, isActive, setActive, expanded, onExpand, onCollapse, onNavigate, onLeaveInsights],
@@ -142,9 +141,12 @@ function ExpandedPanel({
   const localize = useLocalize();
   const tooltipSide = inlineSide(useDirection(), 'end');
   const location = useLocation();
+  const navigate = useNavigate();
   const { active, setActive } = useActivePanel();
   const effectiveActive = resolveActivePanel(active, links);
   const isInsightsRoute = location.pathname.startsWith('/insights');
+  const isHermesRoute = location.pathname.startsWith('/hermes');
+  const leaveRoute = isHermesRoute ? () => navigate('/c/new') : onLeaveInsights;
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
   const toggleClick = expanded ? onCollapse : onExpand;
@@ -174,7 +176,6 @@ function ExpandedPanel({
       />
       <NewChatButton setActive={setActive} switchToHistory={switchToHistory} />
       <AgentMarketplaceButton />
-      <HermesButton />
       <div className="border-border-inset mx-2 border-b" />
       <div className="flex flex-col gap-1 overflow-y-auto">
         {links.map((link) => (
@@ -184,17 +185,19 @@ function ExpandedPanel({
             isActive={
               link.id === 'insights'
                 ? isInsightsRoute
-                : !isInsightsRoute && link.id === effectiveActive
+                : !isInsightsRoute && !isHermesRoute && link.id === effectiveActive
             }
             expanded={expanded ?? true}
             setActive={setActive}
             onExpand={onExpand}
             onCollapse={onCollapse}
             onNavigate={onNavigate}
-            onLeaveInsights={isInsightsRoute ? onLeaveInsights : undefined}
+            onLeaveInsights={isHermesRoute || isInsightsRoute ? leaveRoute : undefined}
           />
         ))}
       </div>
+
+      <HermesButton onNavigate={onExpand} />
 
       <div className="mt-auto">
         <Suspense fallback={<Skeleton className="h-9 w-9 rounded-lg" />}>
