@@ -1,0 +1,53 @@
+name: Import pinned source history
+
+on:
+  push:
+    paths:
+      - .bootstrap/ready
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: initial-source-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Import baselines and apply the reviewed integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -e src/LibreChat/package.json ]; then
+            echo "Sources are already imported; leaving existing history unchanged."
+            exit 0
+          fi
+          if [ ! -f .bootstrap/ready ]; then
+            echo "Import payload is not ready."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git clone --no-checkout --filter=blob:none https://github.com/LibreChat-AI/LibreChat.git "$RUNNER_TEMP/librechat-source"
+          git -C "$RUNNER_TEMP/librechat-source" fetch --depth=1 origin d4e85d2205c78413ee27d631d7e3b7313556f21d
+          git -C "$RUNNER_TEMP/librechat-source" checkout --detach d4e85d2205c78413ee27d631d7e3b7313556f21d
+          git clone --no-checkout --filter=blob:none https://github.com/NousResearch/hermes-agent.git "$RUNNER_TEMP/hermes-source"
+          git -C "$RUNNER_TEMP/hermes-source" fetch --depth=1 origin caafe5389ae585ef77387a962aee05b1bcf17029
+          git -C "$RUNNER_TEMP/hermes-source" checkout --detach caafe5389ae585ef77387a962aee05b1bcf17029
+          mkdir -p src/LibreChat src/hermes-agent deployment
+          rsync -a --exclude=.git "$RUNNER_TEMP/librechat-source/" src/LibreChat/
+          rsync -a --exclude=.git "$RUNNER_TEMP/hermes-source/" src/hermes-agent/
+          cp -a .bootstrap/baseline/deployment/. deployment/
+          git add --force src/LibreChat src/hermes-agent deployment
+          git commit -m "Import pinned LibreChat and Hermes source baselines" -m "LibreChat: d4e85d2205c78413ee27d631d7e3b7313556f21d. Hermes: caafe5389ae585ef77387a962aee05b1bcf17029. Preserve upstream licenses and original EC2 deployment; integration follows separately."
+          git am .bootstrap/integration.patch
+          git push origin HEAD:main
+          echo "Published baseline and integration commits."
