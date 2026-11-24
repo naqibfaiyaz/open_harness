@@ -83,6 +83,7 @@ PY
 changed=1
 cp "$release/deployment/.env" "$ROOT/.env"
 cp "$release/deployment/integration.librechat.yaml" "$ROOT/integration.librechat.yaml"
+chmod 644 "$ROOT/integration.librechat.yaml"
 cp "$release/compose.autodeploy.yaml" "$ROOT/compose.autodeploy.yaml"
 "${current[@]}" config --quiet
 "${current[@]}" up -d --no-deps --no-build --pull never librechat hermes >/dev/null
