@@ -18,6 +18,7 @@ import { AddedChatContext, ChatFormProvider, useChatContext, useFileMapContext }
 import { AssistantsMapContext, useAssistantsMapContext } from '~/Providers/AssistantsMapContext';
 import { AgentsMapContext, useAgentsMapContext } from '~/Providers/AgentsMapContext';
 import Footer, { useLandingFooter, useConfiguredFooter } from './Footer';
+import { hermesProgressTurn } from '~/components/Hermes/progressTurn';
 import { useChatSettings } from '~/Providers/ChatSettingsContext';
 import ApprovalProvider from './Messages/Content/ApprovalContext';
 import { preloadMessages, renderMessages } from './Messages/load';
@@ -201,10 +202,7 @@ function ChatViewPane({
                                     conversation={
                                       chat.conversation?.conversationId ?? conversationId
                                     }
-                                    turn={
-                                      rootSubmission?.userMessage?.responseMessageId ??
-                                      rootSubmission?.userMessage?.messageId
-                                    }
+                                    turn={hermesProgressTurn(messages, rootSubmission)}
                                     active={chat.isSubmitting}
                                   />
                                 )}

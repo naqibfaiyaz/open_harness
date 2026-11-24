@@ -575,8 +575,8 @@ describe('resolveHeaders', () => {
   it('resolves the response identifier for authenticated Hermes progress correlation', () => {
     expect(
       resolveHeaders({
-        headers: { 'X-Response': '{{LIBRECHAT_BODY_RESPONSEMESSAGEID}}' },
-        body: { responseMessageId: 'response-123_' },
+        headers: { 'X-Response': '{{LIBRECHAT_BODY_MESSAGEID}}' },
+        body: { messageId: 'response-123_' },
       })['X-Response'],
     ).toBe('response-123_');
   });

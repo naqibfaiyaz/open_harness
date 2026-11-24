@@ -6,8 +6,10 @@ never enter LibreChat's native tool execution loop.
 
 The authenticated `/api/hermes/progress/:conversation/:turn` read endpoint is
 scoped to the signed-in LibreChat user. The server's custom endpoint configuration
-supplies the user, conversation and turn IDs (response ID for resubmissions, otherwise
-the user message ID). Replaced runs cannot update the
+supplies the user, conversation and server-allocated assistant response ID. LibreChat's
+runtime request context exposes that ID as `LIBRECHAT_BODY_MESSAGEID`; the frontend
+follows the corresponding assistant message as its optimistic ID is replaced.
+Replaced runs cannot update the
 current response's activity. No management permission is required to read one's
 own activity. Tool arguments, preview labels and results are excluded.
 

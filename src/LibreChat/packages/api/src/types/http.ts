@@ -20,7 +20,6 @@ export type RequestBody = {
   /** Server-assigned MCP tool owner; overwrite browser input at tool construction and invocation. */
   agentId?: string;
   messageId?: string;
-  responseMessageId?: string;
   fileTokenLimit?: number;
   conversationId?: string;
   parentMessageId?: string;

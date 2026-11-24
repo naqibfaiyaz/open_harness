@@ -1,10 +1,32 @@
 import { render, screen } from '@testing-library/react';
+import type { TMessage } from 'librechat-data-provider';
+import { hermesProgressTurn } from './progressTurn';
 import { useHermesProgress } from './queries';
 import HermesProgress from './Progress';
 
 jest.mock('./queries', () => ({ useHermesProgress: jest.fn() }));
 jest.mock('~/hooks', () => ({ useLocalize: () => (key: string) => key }));
 const mockedProgress = useHermesProgress as jest.Mock;
+
+it('follows the allocated assistant ID without selecting another turn or stale branch', () => {
+  const submission = {
+    userMessage: { messageId: 'user-1' },
+    initialResponse: { parentMessageId: 'user-1' },
+  };
+  expect(hermesProgressTurn(null, undefined)).toBeUndefined();
+  expect(hermesProgressTurn([], submission)).toBeUndefined();
+  const messages = [
+    { messageId: 'previous-response', parentMessageId: 'previous-user', isCreatedByUser: false },
+    { messageId: 'user-1', isCreatedByUser: true },
+    { messageId: 'user-1_', parentMessageId: 'user-1', isCreatedByUser: false },
+  ] as TMessage[];
+  expect(hermesProgressTurn(messages, submission)).toBe('user-1_');
+  messages[2] = { ...messages[2], messageId: 'allocated-assistant-response' };
+  expect(hermesProgressTurn(messages, submission)).toBe('allocated-assistant-response');
+  expect(
+    hermesProgressTurn(messages, { userMessage: { messageId: 'another-user' } }),
+  ).toBeUndefined();
+});
 
 it('shows running and completed tools without arguments and stops showing stale activity when idle', () => {
   mockedProgress.mockReturnValue({

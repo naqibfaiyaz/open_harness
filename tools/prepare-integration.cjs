@@ -18,8 +18,7 @@ config.endpoints = { agents: { capabilities: ['tools', 'artifacts'], disableBuil
     models: { default: ['Agent: default'], fetch: true },
     headers: { 'X-LibreChat-User-Id': '{{LIBRECHAT_USER_ID}}',
       'X-LibreChat-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-      'X-LibreChat-Response-Id': '{{LIBRECHAT_BODY_RESPONSEMESSAGEID}}',
-      'X-LibreChat-Message-Id': '{{LIBRECHAT_BODY_MESSAGEID}}' },
+      'X-LibreChat-Response-Id': '{{LIBRECHAT_BODY_MESSAGEID}}' },
     titleConvo: true, titleTiming: 'immediate', titleMethod: 'completion',
     titleModel: '__hermes_chat_title__', titlePrompt: '{convo}', titlePromptTemplate: '{input}',
     summarize: false, modelDisplayLabel: 'Hermes' }] };
