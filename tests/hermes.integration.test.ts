@@ -21,6 +21,7 @@ upstream.use(express.urlencoded({ extended: true, verify: recordBytes }));
 let logins = 0;
 const runs: { path: string; key: string; session: string; body: Record<string, unknown> }[] = [];
 const envWrites: Record<string, unknown>[] = [];
+const titlePrompts: string[] = [];
 let expiredRedirects = 0;
 let cancelledStream: (() => void) | undefined;
 upstream.post('/auth/password-login', (req: any, res: any) => {
@@ -38,6 +39,12 @@ upstream.use('/api', (req: any, res: any, next: any) => {
 upstream.get('/api/profiles', (_req: any, res: any) => res.json({ profiles: [
   { name: 'default', description: 'Default agent' }, { name: 'research', description: 'Research agent' },
 ] }));
+upstream.post('/api/plugins/open-harness-titles/generate', (req: any, res: any) => {
+  assert.equal(req.get('x-open-harness-key'), secrets.bridgeKey);
+  titlePrompts.push(req.body.prompt);
+  if (req.body.prompt === 'Fail title model') return res.status(503).end();
+  res.json({ title: 'Montreal Travel Itinerary' });
+});
 upstream.put('/api/env', (req: any, res: any) => { envWrites.push(req.body); res.json({ ok: true }); });
 upstream.post('/api/config', (req: any, res: any) => res.json({ data: req.body, original: req.originalBytes }));
 upstream.get('/api/range', (req: any, res: any) => {
@@ -332,14 +339,24 @@ test('first-prompt titles never execute Hermes or its tools', async () => {
     { role: 'assistant', content: 'Unrelated response' },
   ] });
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).choices[0].message.content, 'Plan a three-day trip to');
+  assert.equal((await response.json()).choices[0].message.content, 'Montreal Travel Itinerary');
+  assert.equal(titlePrompts.at(-1), 'Plan a three-day trip to Montreal\nwith museums');
   assert.equal(runs.length, count);
   const stream = await chat('__hermes_chat_title__', { stream: true, messages: [
     { role: 'user', content: [{ type: 'image_url', image_url: {} }, { type: 'text', text: 'Compare these two diagrams' }] },
   ] });
   const body = await stream.text();
-  assert.match(body, /Compare these two diagrams/);
+  assert.match(body, /Montreal Travel Itinerary/);
+  assert.equal(titlePrompts.at(-1), 'Compare these two diagrams');
   assert.match(body, /data: \[DONE\]/);
   assert.equal(runs.length, count);
   assert.equal((await chat('__hermes_chat_title__', {}, { 'X-LibreChat-User-Id': '' })).status, 400);
+});
+
+test('title model failures fall back without failing chat or invoking agent tools', async () => {
+  const count = runs.length;
+  const response = await chat('__hermes_chat_title__', { messages: [{ role: 'user', content: 'Fail title model' }] });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).choices[0].message.content, 'Fail title model');
+  assert.equal(runs.length, count);
 });

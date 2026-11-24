@@ -15,7 +15,7 @@ exec 9>"$ROOT/.deploy.lock"
 flock -w 600 9
 release="$ROOT/releases/$commit"
 backup="$ROOT/backups/$(date -u +%Y%m%dT%H%M%SZ)-$commit"
-mkdir -p "$release/tools" "$release/deployment" "$backup"
+mkdir -p "$release/tools" "$release/deployment" "$release/integrations/hermes-titles/dashboard" "$backup"
 chmod 700 "$ROOT/releases" "$ROOT/backups" "$release" "$backup"
 export DOCKER_CONFIG="$release/.docker"
 mkdir -p "$DOCKER_CONFIG"
@@ -47,9 +47,11 @@ rollback() {
 trap rollback ERR
 trap 'rm -f "$DOCKER_CONFIG/config.json"' EXIT
 echo "Preparing release $commit"
-for file in tools/prepare-integration.cjs deployment/verify-live.cjs; do
+for file in tools/prepare-integration.cjs deployment/verify-live.cjs integrations/hermes-titles/dashboard/manifest.json integrations/hermes-titles/dashboard/api.py; do
   curl --fail --silent --show-error --retry 3 "https://raw.githubusercontent.com/naqibfaiyaz/open_harness/$commit/$file" -o "$release/$file"
 done
+chmod 755 "$release/integrations/hermes-titles" "$release/integrations/hermes-titles/dashboard"
+chmod 644 "$release/integrations/hermes-titles/dashboard/manifest.json" "$release/integrations/hermes-titles/dashboard/api.py"
 aws_cli ecr get-login-password --region ca-central-1 | docker login --username AWS --password-stdin "$REGISTRY" >/dev/null
 docker pull "$IMAGE" >/dev/null
 actual=$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$IMAGE")
@@ -76,7 +78,9 @@ config = {'services': {'librechat': {'image': image, 'labels': {'io.open-harness
   'HERMES_DASHBOARD_USERNAME': '${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}',
   'HERMES_DASHBOARD_PASSWORD': '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}', 'HERMES_DASHBOARD_PROVIDER': 'basic'},
   'volumes': ['./integration.librechat.yaml:/app/librechat.yaml:ro']},
-  'hermes': {'environment': {'GATEWAY_MULTIPLEX_PROFILES':'true','API_SERVER_ENABLED':'true',
+  'hermes': {'volumes': [str(release/'integrations/hermes-titles') + ':/opt/hermes/plugins/open-harness-titles:ro'],
+  'environment': {'GATEWAY_MULTIPLEX_PROFILES':'true','API_SERVER_ENABLED':'true',
+  'HERMES_BRIDGE_KEY': '${HERMES_BRIDGE_KEY}',
   'HERMES_DASHBOARD_BASIC_AUTH_USERNAME': '${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}',
   'HERMES_DASHBOARD_BASIC_AUTH_PASSWORD': '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}',
   'HERMES_DASHBOARD_PUBLIC_URL': '${DOMAIN_CLIENT}/hermes-workspace'}}}}

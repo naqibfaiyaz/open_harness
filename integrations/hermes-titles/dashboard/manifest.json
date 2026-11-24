@@ -1,0 +1,8 @@
+{
+  "name": "open-harness-titles",
+  "label": "LibreChat titles",
+  "description": "Stateless AI titles for LibreChat conversations",
+  "version": "1.0.0",
+  "tab": { "hidden": true },
+  "api": "api.py"
+}

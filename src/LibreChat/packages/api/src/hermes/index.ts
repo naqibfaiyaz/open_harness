@@ -16,7 +16,7 @@ import { canManageHermes, validateHermesConfig } from './config';
 import { HermesDashboard } from './dashboard';
 export { createHermesBodyCapture, createHermesRequestSanitizer } from './body';
 import { HermesRuntime } from './runtime';
-import { firstPromptTitle, HERMES_TITLE_MODEL } from './titles';
+import { generatePromptTitle, HERMES_TITLE_MODEL } from './titles';
 
 interface Dependencies {
   config: HermesConfig;
@@ -188,7 +188,19 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
         return error(res, 400, 'HERMES_CONFIGURE_TOOLS_IN_WORKSPACE');
       }
       if (req.body.model === HERMES_TITLE_MODEL) {
-        const content = firstPromptTitle(req.body.messages);
+        const content = await generatePromptTitle(req.body.messages, async (prompt) => {
+          const response = await dashboard.fetch('/api/plugins/open-harness-titles/generate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Open-Harness-Key': secrets.bridgeKey,
+            },
+            body: JSON.stringify({ prompt }),
+          });
+          if (!response.ok) throw new Error('HERMES_TITLE_UNAVAILABLE');
+          const payload = (await response.json()) as { title: string };
+          return payload.title;
+        });
         const completion = {
           id: 'hermes-title',
           object: 'chat.completion',

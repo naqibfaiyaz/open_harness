@@ -17,7 +17,10 @@ services:
       - ./integration.librechat.yaml:/app/librechat.yaml:ro
   hermes:
     environment:
+      HERMES_BRIDGE_KEY: ${HERMES_BRIDGE_KEY:?Missing bridge key}
       GATEWAY_MULTIPLEX_PROFILES: "true"
       HERMES_DASHBOARD_PUBLIC_URL: ${DOMAIN_CLIENT:?Missing public LibreChat origin}/hermes-workspace
       # Applies to profile adapters as well; keys remain profile scoped.
       API_SERVER_ENABLED: "true"
+    volumes:
+      - ../integrations/hermes-titles:/opt/hermes/plugins/open-harness-titles:ro
