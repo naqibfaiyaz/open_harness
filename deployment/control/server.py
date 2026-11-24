@@ -92,6 +92,7 @@ class Server(socketserver.ThreadingMixIn, socketserver.UnixStreamServer):
     daemon_threads = True
 
 socket_path.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+os.chmod(socket_path.parent, 0o755)
 socket_path.unlink(missing_ok=True)
 server = Server(str(socket_path), Handler)
 os.chown(socket_path, 0, 1000)

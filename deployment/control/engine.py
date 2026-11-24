@@ -1,5 +1,6 @@
 """Host-only organization provisioner. No customer app receives a Docker socket."""
 import datetime
+from contextlib import contextmanager
 import ipaddress
 import json
 import os
@@ -49,10 +50,15 @@ class Engine:
                 db.execute("UPDATE organizations SET status='failed',errorCode='WORKER_RESTARTED' WHERE status='provisioning'")
         self.token = None
 
+    @contextmanager
     def db(self):
         db = sqlite3.connect(ROOT/'control.db', timeout=15)
         db.row_factory = sqlite3.Row
-        return db
+        try:
+            with db:
+                yield db
+        finally:
+            db.close()
 
     def audit(self, actor, action, target, reason, outcome):
         with self.db() as db:
@@ -172,9 +178,10 @@ class Engine:
                 'requiredActions': ['UPDATE_PASSWORD'], 'credentials': [{'type': 'password',
                 'value': json.loads(ownerfile.read_text())['password'], 'temporary': True}]})
             users = self.kc(path+'/users?username='+urllib.parse.quote(row['ownerEmail'])+'&exact=true')
-        role = self.kc(path+'/roles/org-owner')
-        self.kc(path+'/users/'+users[0]['id']+'/role-mappings/realm', 'POST', [role])
-        ownerfile.unlink(missing_ok=True)
+        if ownerfile.exists():
+            role = self.kc(path+'/roles/org-owner')
+            self.kc(path+'/users/'+users[0]['id']+'/role-mappings/realm', 'POST', [role])
+            ownerfile.unlink()
 
     def render(self, row):
         target = self.tenant(row['slug'])
@@ -196,8 +203,12 @@ class Engine:
                 'HERMES_DASHBOARD_USERNAME': 'operator', 'HERMES_DASHBOARD_PROVIDER': 'basic',
                 'HERMES_DASHBOARD_PASSWORD': settings['HERMES_DASHBOARD_BASIC_AUTH_PASSWORD'],
                 'TITLE_CONVO': 'true', 'ALLOW_SHARED_LINKS': 'true', 'ALLOW_SHARED_LINKS_PUBLIC': 'true'})
+            settings['SCHEDULES_SINGLE_PROCESS'] = 'true'
             settings_file.write_text(json.dumps(settings))
         image = run(['docker', 'inspect', '--format', '{{.Config.Image}}', 'librechat-hermes-pilot-librechat-1'])
+        settings.update({'OPENID_ADMIN_ROLE': 'org-owner', 'OPENID_ADMIN_ROLE_PARAMETER_PATH': 'realm_access.roles',
+            'OPENID_ADMIN_ROLE_TOKEN_KIND': 'access', 'SCHEDULES_SINGLE_PROCESS': 'true'})
+        settings_file.write_text(json.dumps(settings))
         config = json.loads((PILOT/'integration.librechat.yaml').read_text())
         config.pop('platform', None)
         config['organization'] = {'enabled': True, 'name': row['name'], 'realm': row['realm'],
@@ -223,18 +234,19 @@ class Engine:
             'librechat': {'image': image, 'restart': 'unless-stopped', 'environment': {**settings, 'CONFIG_PATH': '/app/librechat.yaml'},
                 'mem_limit': '1536m', 'pids_limit': 256, 'security_opt': ['no-new-privileges:true'], 'cap_drop': ['ALL'],
                 'volumes': ['./librechat.json:/app/librechat.yaml:ro', 'uploads:/app/uploads', 'images:/app/client/public/images', 'logs:/app/logs', 'data:/app/data'],
-                'networks': {'backend': {}, 'edge': {'aliases': ['lc-'+row['slug']]}},
+                'networks': {'backend': {}, 'data': {}, 'edge': {'aliases': ['lc-'+row['slug']]}},
                 'depends_on': {'mongodb': {'condition': 'service_healthy'}}},
             'mongodb': {'image': 'mongo:8.0.20', 'restart': 'unless-stopped', 'mem_limit': '512m',
                 'command': ['mongod', '--bind_ip_all', '--wiredTigerCacheSizeGB', '0.25'],
-                'volumes': ['mongo:/data/db'], 'networks': ['backend'],
+                'volumes': ['mongo:/data/db'], 'networks': ['data'],
                 'healthcheck': {'test': ['CMD','mongosh','--quiet','--eval',"db.adminCommand('ping').ok"], 'interval': '5s','retries': 20}},
             'hermes': {'image': 'nousresearch/hermes-agent@sha256:41468459379a943cf0a25a55589e230d244bd9f95b83cff5eca789470c892fac',
                 'restart': 'unless-stopped', 'command': ['gateway', 'run'], 'environment': hermes_env,
-                'mem_limit': '2g', 'pids_limit': 256, 'cap_drop': ['ALL'], 'security_opt': ['no-new-privileges:true'],
+                'mem_limit': '2g', 'pids_limit': 256, 'cap_drop': ['ALL'],
+                'cap_add': ['CHOWN','DAC_OVERRIDE','FOWNER','SETUID','SETGID'], 'security_opt': ['no-new-privileges:true'],
                 'volumes': ['hermes:/opt/data', str(release)+':/opt/hermes/plugins/open-harness-titles:ro', theme+':/opt/data/dashboard-themes/librechat.yaml:ro'],
                 'networks': ['backend']}},
-            'networks': {'backend': {}, 'edge': {'internal': True}},
+            'networks': {'backend': {}, 'data': {'internal': True}, 'edge': {'internal': True}},
             'volumes': {name: {} for name in ['uploads','images','logs','data','mongo','hermes']}}
         (target/'compose.json').write_text(json.dumps(compose))
         return settings, project

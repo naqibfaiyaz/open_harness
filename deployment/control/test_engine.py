@@ -39,4 +39,20 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(replacement.get('company-a')['status'], 'failed')
         self.assertEqual(replacement.get('open-harness')['status'], 'active')
 
+    def test_resume_never_regrants_the_original_owner_role(self):
+        row=self.create('company-a')
+        (self.engine.tenant(row['slug'])/'owner.json').unlink()
+        writes=[]
+        def kc(path,method='GET',body=None):
+            if method!='GET': writes.append((path,method)); return None
+            if path.endswith('/client-scopes'): return [{'id':'scope','name':'kc-admin-api'}]
+            if path.endswith('/service-account-user'): return {'id':'service'}
+            if '/clients?clientId=' in path: return [{'id':'client'}]
+            if path.endswith('/roles'): return []
+            if '/users?username=' in path: return [{'id':'former-owner'}]
+            return {'id':'realm'}
+        self.engine.kc=kc
+        self.engine.setup_identity(row,{'OPENID_CLIENT_SECRET':'synthetic','KEYCLOAK_MANAGEMENT_SECRET':'synthetic'})
+        self.assertFalse(any('/users/former-owner/role-mappings' in path for path,method in writes))
+
 if __name__ == '__main__': unittest.main()

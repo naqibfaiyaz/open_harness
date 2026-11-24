@@ -22,6 +22,10 @@ Each additional organization receives its own:
 * Hermes container, home volume, gateway key, credentials, skills, tools and memory.
 * Docker networks and memory/process limits; no published database or Hermes ports.
 
+MongoDB uses a separate internal network which Hermes cannot reach. Hermes retains
+only the small capability set needed by its image's service-user/data-directory
+initialization; raw sockets, privileged mode and Docker access remain disabled.
+
 Only the HTTPS proxy joins each private ingress network. Keycloak joins each
 organization backend for identity requests. Network rules reject instance metadata,
 other private networks and host input from tenant backends. EC2 already requires
@@ -76,6 +80,11 @@ Service: `open-harness-control.service`. Registry and organization configuration
 The main application receives a filtered `.librechat.env`; Keycloak bootstrap,
 database and control-service identity credentials stay on the host. The readonly
 socket mount is enabled only on the internal application.
+
+Proxy routing reloads through a Unix-only Caddy admin socket inside the proxy
+container, rather than exposing a network administration endpoint or restarting
+the proxy for each organization change. The worker socket's parent is traversable
+by the application user, while the socket itself remains group-restricted.
 
 Back up the registry, organization configuration, each MongoDB, each Hermes home,
 and Keycloak PostgreSQL. The local audit table is append-only through the API, not
