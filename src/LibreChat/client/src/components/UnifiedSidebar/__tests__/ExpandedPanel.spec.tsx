@@ -4,6 +4,7 @@ import { getDefaultStore } from 'jotai';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 
+jest.mock('~/components/Organization/Button', () => ({ __esModule: true, default: () => null }));
 jest.mock('~/components/Hermes/queries', () => ({
   useHermesStatus: () => ({ data: { enabled: false, canManage: false } }),
 }));

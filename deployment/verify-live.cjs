@@ -7,6 +7,12 @@ async function check() {
   const token = jwt.sign({ id: adminId, issuedAtMs: Date.now() }, process.env.JWT_SECRET, { expiresIn: '2m' });
   const headers = { Authorization: `Bearer ${token}` };
   const url = 'http://127.0.0.1:3080';
+  if (process.env.KEYCLOAK_ORIGIN) {
+    const org = await fetch(`${url}/api/organization`, { headers });
+    if (!org.ok || (await org.json()).role !== 'owner') throw new Error('Organization owner authorization failed');
+    const members = await fetch(`${url}/api/organization/members`, { headers });
+    if (!members.ok || !Array.isArray(await members.json())) throw new Error('Organization membership connection failed');
+  }
   const status = await fetch(`${url}/api/hermes/status`, { headers }).then(async (r) => {
     if (!r.ok) throw new Error(`Workspace status failed: HTTP ${r.status}`);
     return r.json();

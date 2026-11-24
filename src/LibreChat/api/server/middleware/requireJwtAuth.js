@@ -3,6 +3,7 @@ const passport = require('passport');
 const { logger } = require('@librechat/data-schemas');
 const {
   isEnabled,
+  withOrganizationAuth,
   isTokenRetired,
   createRequiredTwoFactorGate,
   clearCloudFrontCookies,
@@ -264,7 +265,10 @@ const requireRumProxyAuth = (req, res, next) => {
   tryNextStrategy();
 };
 
-module.exports = requireJwtAuth;
+module.exports = withOrganizationAuth(requireJwtAuth, {
+  getConfig: async () => (await getAppConfig()).config?.organization,
+  secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
+});
 module.exports.requireRumProxyAuth = requireRumProxyAuth;
 module.exports.requireTermsAcceptance = requireTermsAcceptance;
 module.exports.requireTermsAcceptanceOnRead = requireTermsAcceptanceOnRead;

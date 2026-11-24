@@ -12,6 +12,7 @@ const url = `https://alice:${secret}@librechat.example/c/new?tempToken=${secret}
 it.each([
   '/login',
   '/hermes',
+  '/organization',
   '/hermes-workspace/models',
   '/login/2fa',
   '/login/2fa/setup',
@@ -31,6 +32,14 @@ it.each([
 it('keeps chat and other ordinary application routes recordable', () => {
   expect(isReplayRouteAllowed('/c/new')).toBe(true);
   expect(isReplayRouteAllowed('/search')).toBe(true);
+});
+
+it('removes organization password and provider configuration bodies at all deployment paths', () => {
+  for (const path of ['/api/organization/identity', '/api/organization/members', '/app/api/organization/connections']) {
+    const result = sanitizeSpanAttributes({ 'http.url': `https://example.test${path}`,
+      'http.request.body': secret, 'http.response.body': secret });
+    expect(JSON.stringify(result)).not.toContain(secret);
+  }
 });
 
 it('strips credentials, query strings and fragments without changing useful URL paths', () => {

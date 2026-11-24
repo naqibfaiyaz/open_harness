@@ -23,11 +23,13 @@ export interface HermesUser {
   id?: string;
   _id?: unknown;
   role?: string;
+  organizationRole?: 'owner' | 'admin' | 'user';
 }
 
 export function canManageHermes(user: HermesUser | undefined, config: HermesConfig): boolean {
   if (!user) return false;
   const id = user.id ?? String(user._id ?? '');
+  if (user.organizationRole) return config.enabled && user.organizationRole !== 'user';
   return config.enabled && (user.role === 'ADMIN' || config.allowedUserIds.includes(id));
 }
 

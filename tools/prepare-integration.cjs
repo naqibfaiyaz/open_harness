@@ -12,6 +12,16 @@ const operators = argument('--operators', '').split(',').map((s) => s.trim()).fi
 const config = JSON.parse(fs.readFileSync(path.join(directory, 'librechat.yaml'), 'utf8'));
 config.hermes = { enabled: true, managedOnly: true, publicOrigin: publicURL.origin,
   dashboardURL: 'http://hermes:9119', runtimeURL: 'http://hermes:8642', endpointName: 'Hermes', allowedUserIds: operators };
+const environmentFile = path.join(directory, '.env');
+const identityEnv = fs.existsSync(environmentFile) ? fs.readFileSync(environmentFile, 'utf8') : '';
+const identityOrigin = /^KEYCLOAK_ORIGIN=(.+)$/m.exec(identityEnv)?.[1]?.trim();
+if (identityOrigin) {
+  const recovery = /^ORGANIZATION_BOOTSTRAP_USERS=(.+)$/m.exec(identityEnv)?.[1]?.trim();
+  config.organization = { enabled: true, name: 'Open Harness', realm: 'open-harness',
+    issuer: `${identityOrigin}/realms/open-harness`, adminURL: 'http://keycloak:8080',
+    clientId: 'librechat-management', bootstrapUserIds: recovery ? recovery.split(',') : [],
+    timeoutMs: 10000, maxMembers: 100 };
+}
 config.endpoints = { agents: { capabilities: ['tools', 'artifacts'], disableBuilder: true, allowedProviders: ['Hermes'] },
   custom: [{ name: 'Hermes', apiKey: '${HERMES_BRIDGE_KEY}',
     baseURL: 'http://127.0.0.1:3080/api/hermes/runtime/v1',

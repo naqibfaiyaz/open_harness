@@ -26,6 +26,8 @@ const {
   memoryDiagnostics,
   createSecurityHeaders,
   createHermesIntegration,
+  createOrganizationRouter,
+  organizationUserLoader,
   createHermesBodyCapture,
   createHermesRequestSanitizer,
   performStartupChecks,
@@ -81,6 +83,7 @@ const {
   sweepOrphanedPreviews,
   getRoleByName,
   getUserById,
+  updateUser,
   seedDatabase,
   initializeFavorites,
   closeFavorites,
@@ -463,6 +466,15 @@ const startServer = async () => {
 
   // Hermes remains the resource and execution owner. Legacy code only wires the TS integration.
   const hermesConfig = appConfig.config?.hermes;
+  app.use('/api/organization', createOrganizationRouter({
+    config: appConfig.config?.organization,
+    secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
+    authenticate: require('./middleware/requireJwtAuth'),
+    origin: process.env.DOMAIN_CLIENT,
+    linkIdentity: async (id, subject, issuer) => {
+      await updateUser(id, { openidId: subject, openidIssuer: issuer });
+    },
+  }));
   const hermesIntegration = hermesConfig?.enabled
     ? createHermesIntegration({
         config: hermesConfig,
@@ -474,7 +486,11 @@ const startServer = async () => {
           bridgeKey: process.env.HERMES_BRIDGE_KEY ?? '',
         },
         authenticate: require('./middleware/requireJwtAuth'),
-        loadUser: async (id) => (await getUserById(id, 'id role')) ?? undefined,
+        loadUser: organizationUserLoader({
+          config: appConfig.config?.organization,
+          secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
+          loadUser: async (id) => (await getUserById(id, 'id role openidId openidIssuer email')) ?? undefined,
+        }),
       })
     : undefined;
   if (hermesIntegration) {

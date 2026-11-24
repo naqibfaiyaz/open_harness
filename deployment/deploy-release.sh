@@ -21,7 +21,7 @@ export DOCKER_CONFIG="$release/.docker"
 mkdir -p "$DOCKER_CONFIG"
 changed=0
 base=(docker compose --project-directory "$ROOT" -f "$ROOT/compose.yaml")
-for file in compose.override.yaml compose.features.yaml; do
+for file in compose.override.yaml compose.features.yaml compose.keycloak.yaml; do
   if test -f "$ROOT/$file"; then base+=(-f "$ROOT/$file"); fi
 done
 old=("${base[@]}")
@@ -70,7 +70,7 @@ python3 - "$ROOT" "$release" "$IMAGE" "$commit" <<'PY'
 import json, pathlib, sys
 root, release = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 image, commit = sys.argv[3:5]
-files = ['compose.yaml'] + [n for n in ['compose.override.yaml','compose.features.yaml'] if (root/n).exists()] + ['compose.autodeploy.yaml']
+files = ['compose.yaml'] + [n for n in ['compose.override.yaml','compose.features.yaml','compose.keycloak.yaml'] if (root/n).exists()] + ['compose.autodeploy.yaml']
 envfile = release/'deployment/.env'
 lines = [s for s in envfile.read_text().splitlines() if not s.startswith('COMPOSE_FILE=')]
 envfile.write_text('\n'.join(lines + ['COMPOSE_FILE=' + ':'.join(files)]) + '\n')

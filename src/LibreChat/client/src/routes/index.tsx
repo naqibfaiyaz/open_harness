@@ -178,6 +178,10 @@ export const router = createBrowserRouter(
                     ),
                 },
                 {
+                  path: 'organization',
+                  lazy: () => importWithRecovery(() => import('~/components/Organization')).then((m) => ({ Component: m.default })),
+                },
+                {
                   path: 'prompts',
                   element: <Navigate to="/c/new" replace={true} />,
                 },

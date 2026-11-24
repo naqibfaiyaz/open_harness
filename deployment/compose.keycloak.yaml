@@ -1,0 +1,42 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    restart: unless-stopped
+    command: [start, --import-realm]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?Missing database password}
+      KC_HOSTNAME: ${KEYCLOAK_ORIGIN:?Missing identity origin}
+      KC_HOSTNAME_ADMIN: ${KEYCLOAK_ORIGIN:?Missing identity origin}
+      KC_HTTP_ENABLED: 'true'
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: 'true'
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      JAVA_OPTS_APPEND: '-XX:UseAVX=2'
+    mem_limit: 2g
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    ports: [127.0.0.1:8180:8080]
+    networks: [app, identity]
+    depends_on:
+      keycloak-db: { condition: service_healthy }
+  keycloak-db:
+    image: postgres:17.7-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?Missing database password}
+    volumes: [keycloak_data:/var/lib/postgresql/data]
+    networks: [identity]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U keycloak -d keycloak]
+      interval: 5s
+      retries: 20
+volumes:
+  keycloak_data:
+networks:
+  identity: { internal: true }
