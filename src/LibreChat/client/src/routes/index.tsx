@@ -182,6 +182,10 @@ export const router = createBrowserRouter(
                   lazy: () => importWithRecovery(() => import('~/components/Organization')).then((m) => ({ Component: m.default })),
                 },
                 {
+                  path: 'platform',
+                  lazy: () => importWithRecovery(() => import('~/components/Platform')).then((m) => ({ Component: m.default })),
+                },
+                {
                   path: 'prompts',
                   element: <Navigate to="/c/new" replace={true} />,
                 },

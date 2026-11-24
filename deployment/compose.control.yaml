@@ -1,0 +1,8 @@
+services:
+  librechat:
+    env_file: !override [./.librechat.env]
+    environment:
+      PLATFORM_CONTROL_KEY: ${PLATFORM_CONTROL_KEY:?Install the organization control plane first}
+    volumes:
+      - ./.librechat.env:/app/.env:ro
+      - /run/open-harness:/run/open-harness:ro

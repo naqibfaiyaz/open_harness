@@ -15,13 +15,19 @@ config.hermes = { enabled: true, managedOnly: true, publicOrigin: publicURL.orig
 const environmentFile = path.join(directory, '.env');
 const identityEnv = fs.existsSync(environmentFile) ? fs.readFileSync(environmentFile, 'utf8') : '';
 const identityOrigin = /^KEYCLOAK_ORIGIN=(.+)$/m.exec(identityEnv)?.[1]?.trim();
+const getIdentityEnv = (name, fallback) => new RegExp(`^${name}=(.+)$`, 'm').exec(identityEnv)?.[1]?.trim() || fallback;
 if (identityOrigin) {
   const recovery = /^ORGANIZATION_BOOTSTRAP_USERS=(.+)$/m.exec(identityEnv)?.[1]?.trim();
-  config.organization = { enabled: true, name: 'Open Harness', realm: 'open-harness',
-    issuer: `${identityOrigin}/realms/open-harness`, adminURL: 'http://keycloak:8080',
+  const realm = getIdentityEnv('ORGANIZATION_REALM', 'open-harness');
+  config.organization = { enabled: true, name: getIdentityEnv('ORGANIZATION_NAME', 'Open Harness'), realm,
+    issuer: `${identityOrigin}/realms/${realm}`, adminURL: 'http://keycloak:8080',
     clientId: 'librechat-management', bootstrapUserIds: recovery ? recovery.split(',') : [],
     timeoutMs: 10000, maxMembers: 100 };
 }
+if (getIdentityEnv('PLATFORM_CONTROL_ENABLED', '') === 'true') {
+  config.platform = { enabled: true, socketPath: '/run/open-harness/control.sock',
+    bootstrapUserIds: getIdentityEnv('PLATFORM_BOOTSTRAP_USERS', '').split(',').filter(Boolean), timeoutMs: 10000, requireMfa: true };
+} else delete config.platform;
 config.endpoints = { agents: { capabilities: ['tools', 'artifacts'], disableBuilder: true, allowedProviders: ['Hermes'] },
   custom: [{ name: 'Hermes', apiKey: '${HERMES_BRIDGE_KEY}',
     baseURL: 'http://127.0.0.1:3080/api/hermes/runtime/v1',

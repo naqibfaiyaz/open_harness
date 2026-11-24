@@ -4787,6 +4787,13 @@ export const DEFAULT_CONFIG_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 export const DEFAULT_CONFIG_CACHE_MAX_ENTRIES = 1000;
 
 export const configSchema = z.object({
+  platform: z.object({
+    enabled: z.boolean().default(false),
+    socketPath: z.string().default('/run/open-harness/control.sock'),
+    bootstrapUserIds: z.array(z.string()).default([]),
+    timeoutMs: z.number().int().min(1000).max(30000).default(10000),
+    requireMfa: z.boolean().default(true),
+  }).optional(),
   organization: z.object({
     enabled: z.boolean().default(false),
     name: z.string().min(1).max(100),

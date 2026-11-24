@@ -185,3 +185,4 @@ export * from './channels/cleanup';
 export * from './channels/summary';
 export * from './hermes';
 export * from './organization';
+export * from './platform';

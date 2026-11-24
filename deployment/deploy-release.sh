@@ -21,7 +21,7 @@ export DOCKER_CONFIG="$release/.docker"
 mkdir -p "$DOCKER_CONFIG"
 changed=0
 base=(docker compose --project-directory "$ROOT" -f "$ROOT/compose.yaml")
-for file in compose.override.yaml compose.features.yaml compose.keycloak.yaml; do
+for file in compose.override.yaml compose.features.yaml compose.keycloak.yaml compose.control.yaml; do
   if test -f "$ROOT/$file"; then base+=(-f "$ROOT/$file"); fi
 done
 old=("${base[@]}")
@@ -70,7 +70,7 @@ python3 - "$ROOT" "$release" "$IMAGE" "$commit" <<'PY'
 import json, pathlib, sys
 root, release = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 image, commit = sys.argv[3:5]
-files = ['compose.yaml'] + [n for n in ['compose.override.yaml','compose.features.yaml','compose.keycloak.yaml'] if (root/n).exists()] + ['compose.autodeploy.yaml']
+files = ['compose.yaml'] + [n for n in ['compose.override.yaml','compose.features.yaml','compose.keycloak.yaml','compose.control.yaml'] if (root/n).exists()] + ['compose.autodeploy.yaml']
 envfile = release/'deployment/.env'
 lines = [s for s in envfile.read_text().splitlines() if not s.startswith('COMPOSE_FILE=')]
 envfile.write_text('\n'.join(lines + ['COMPOSE_FILE=' + ':'.join(files)]) + '\n')
@@ -87,12 +87,15 @@ config = {'services': {'librechat': {'image': image, 'labels': {'io.open-harness
   'HERMES_DASHBOARD_BASIC_AUTH_PASSWORD': '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}',
   'HERMES_DASHBOARD_PUBLIC_URL': '${DOMAIN_CLIENT}/hermes-workspace'}}}}
 (release/'compose.autodeploy.yaml').write_text(json.dumps(config, indent=2) + '\n')
+excluded = {'PLATFORM_KEYCLOAK_SECRET','KEYCLOAK_ADMIN_PASSWORD','KEYCLOAK_ADMIN_USERNAME','KEYCLOAK_DB_PASSWORD'}
+(release/'librechat.env').write_text('\n'.join(line for line in lines if line.split('=',1)[0] not in excluded) + '\n')
 PY
 changed=1
 cp "$release/deployment/.env" "$ROOT/.env"
 cp "$release/deployment/integration.librechat.yaml" "$ROOT/integration.librechat.yaml"
 chmod 644 "$ROOT/integration.librechat.yaml"
 cp "$release/compose.autodeploy.yaml" "$ROOT/compose.autodeploy.yaml"
+cp "$release/librechat.env" "$ROOT/.librechat.env"
 "${current[@]}" config --quiet
 "${current[@]}" up -d --no-deps --no-build --pull never librechat hermes >/dev/null
 ready=0

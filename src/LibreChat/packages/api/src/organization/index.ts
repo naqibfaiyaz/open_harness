@@ -65,6 +65,7 @@ export function createOrganizationRouter(deps: {
   origin: string;
   linkIdentity(id: string, subject: string, issuer: string): Promise<void>;
   request?: typeof fetch;
+  platformOperatorIds?: string[];
 }): Router {
   const router = Router();
   const config = deps.config;
@@ -192,6 +193,11 @@ export function createOrganizationRouter(deps: {
         throw new IdentityError('ORG_INVALID_INPUT', 400);
       const subject = await service!.create(req.user.email, req.body.password, 'owner', false);
       try {
+        if (deps.platformOperatorIds?.includes(String(req.user.id ?? req.user._id))) {
+          const role = await service!.call<{ id: string; name: string }>('/roles/platform-admin');
+          await service!.call(`/users/${encodeURIComponent(subject)}/role-mappings/realm`, 'POST', [role]);
+          await service!.call(`/users/${encodeURIComponent(subject)}`, 'PUT', { requiredActions: ['CONFIGURE_TOTP'] });
+        }
         await deps.linkIdentity(String(req.user.id ?? req.user._id), subject, config!.issuer);
       } catch (cause) {
         await service!.call(`/users/${encodeURIComponent(subject)}`, 'DELETE');

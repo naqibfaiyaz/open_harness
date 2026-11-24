@@ -13,6 +13,7 @@ it.each([
   '/login',
   '/hermes',
   '/organization',
+  '/platform',
   '/hermes-workspace/models',
   '/login/2fa',
   '/login/2fa/setup',
@@ -35,7 +36,7 @@ it('keeps chat and other ordinary application routes recordable', () => {
 });
 
 it('removes organization password and provider configuration bodies at all deployment paths', () => {
-  for (const path of ['/api/organization/identity', '/api/organization/members', '/app/api/organization/connections']) {
+  for (const path of ['/api/platform/organizations', '/app/api/platform/organizations/example/members/user', '/api/organization/identity', '/api/organization/members', '/app/api/organization/connections']) {
     const result = sanitizeSpanAttributes({ 'http.url': `https://example.test${path}`,
       'http.request.body': secret, 'http.response.body': secret });
     expect(JSON.stringify(result)).not.toContain(secret);

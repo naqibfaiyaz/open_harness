@@ -7,6 +7,15 @@ async function check() {
   const token = jwt.sign({ id: adminId, issuedAtMs: Date.now() }, process.env.JWT_SECRET, { expiresIn: '2m' });
   const headers = { Authorization: `Bearer ${token}` };
   const url = 'http://127.0.0.1:3080';
+  if (process.env.PLATFORM_CONTROL_ENABLED === 'true') {
+    const response = await fetch(`${url}/api/platform/status`, { headers });
+    const platform = await response.json();
+    if (!response.ok || !platform.enabled || (!platform.canManage && !platform.needsMfa)) throw new Error('Platform authorization is not configured for the initial operator');
+    if (platform.canManage) {
+      const organizations = await fetch(`${url}/api/platform/organizations`, { headers });
+      if (!organizations.ok || !Array.isArray(await organizations.json())) throw new Error('Protected organization provisioner is unavailable');
+    }
+  }
   if (process.env.KEYCLOAK_ORIGIN) {
     const org = await fetch(`${url}/api/organization`, { headers });
     if (!org.ok || (await org.json()).role !== 'owner') throw new Error('Organization owner authorization failed');
