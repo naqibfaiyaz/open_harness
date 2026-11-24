@@ -171,6 +171,13 @@ export const router = createBrowserRouter(
                   lazy: loadSearch,
                 },
                 {
+                  path: 'hermes',
+                  lazy: () =>
+                    importWithRecovery(() => import('~/components/Hermes/HermesWorkspace')).then(
+                      (m) => ({ Component: m.default }),
+                    ),
+                },
+                {
                   path: 'prompts',
                   element: <Navigate to="/c/new" replace={true} />,
                 },

@@ -11,6 +11,8 @@ const url = `https://alice:${secret}@librechat.example/c/new?tempToken=${secret}
 
 it.each([
   '/login',
+  '/hermes',
+  '/hermes-workspace/models',
   '/login/2fa',
   '/login/2fa/setup',
   '/register',
@@ -265,6 +267,10 @@ it('checks header names before URL redaction and preserves ordinary attributes',
 
 it.each([
   '/api/auth/login',
+  '/api/hermes/session',
+  '/hermes-workspace/_session',
+  '/hermes-workspace/api/env',
+  '/hermes-workspace/api/providers/custom-endpoints',
   '/api/auth/register',
   '/api/auth/refresh',
   '/api/auth/resetPassword',

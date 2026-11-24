@@ -142,6 +142,7 @@ import { resolveToolRoleGrants } from '~/tools/rolePermissions';
 import { createRequestAgentExecutionContext } from './runtime';
 import { resolveTurnDeliveryRouting } from './files/delivery';
 import { filterFilesByEndpointRuntimeConfig } from '~/files';
+import { hermesTransportParams } from '../hermes/transport';
 import { isFatalAgentInitializationError } from './errors';
 import { assertToolOptionsWithinLimits } from './options';
 import { hasActiveFilePolicy } from '../protection/files';
@@ -1217,6 +1218,7 @@ export async function initializeAgent(
   params: InitializeAgentParams,
   db?: InitializeAgentDbMethods,
 ): Promise<InitializedAgent> {
+  params = hermesTransportParams(params);
   const {
     agent: suppliedAgent,
     loadTools,

@@ -1,0 +1,19 @@
+# Optional for a fresh host. Existing AWS deployments may keep their existing Caddy override.
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      LIBRECHAT_PUBLIC_HOST: ${LIBRECHAT_PUBLIC_HOST:?Run prepare-integration with an HTTPS origin}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.integration:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [app]
+    depends_on: [librechat]
+volumes:
+  caddy_data:
+  caddy_config:

@@ -4787,6 +4787,17 @@ export const DEFAULT_CONFIG_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 export const DEFAULT_CONFIG_CACHE_MAX_ENTRIES = 1000;
 
 export const configSchema = z.object({
+  hermes: z
+    .object({
+      enabled: z.boolean().default(false),
+      managedOnly: z.boolean().default(true),
+      publicOrigin: z.string().url(),
+      dashboardURL: z.string().url().default('http://hermes:9119'),
+      runtimeURL: z.string().url().default('http://hermes:8642'),
+      endpointName: z.string().default('Hermes'),
+      allowedUserIds: z.array(z.string()).default([]),
+    })
+    .optional(),
   persistence: persistenceConfigSchema,
   version: z.string(),
   telemetry: telemetrySchema.optional(),

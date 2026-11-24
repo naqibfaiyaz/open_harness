@@ -1,0 +1,2037 @@
+{
+  "sourceVersion": "v0.23.3 source snapshot",
+  "management": "Stock Hermes dashboard, authenticated by LibreChat through /hermes-workspace",
+  "coverage": "Dashboard resource routes and plugin routes are proxied. Dashboard login/logout are owned by LibreChat. CLI-only capabilities require Hermes terminal/skills; hardware and credential prerequisites still apply.",
+  "pages": [
+    "/chat",
+    "/sessions",
+    "/files",
+    "/analytics",
+    "/models",
+    "/logs",
+    "/cron",
+    "/skills",
+    "/plugins",
+    "/mcp",
+    "/channels",
+    "/webhooks",
+    "/pairing",
+    "/profiles",
+    "/config",
+    "/env",
+    "/system",
+    "/docs"
+  ],
+  "apis": [
+    {
+      "method": "POST",
+      "path": "/api/gateway/restart",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 160
+    },
+    {
+      "method": "GET",
+      "path": "/api/gateway/migrate/plan",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 169
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway/migrate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 177
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway/drain",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 187
+    },
+    {
+      "method": "POST",
+      "path": "/api/hermes/update",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 241
+    },
+    {
+      "method": "GET",
+      "path": "/api/hermes/update/check",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 289
+    },
+    {
+      "method": "GET",
+      "path": "/api/actions/{name}/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 413
+    },
+    {
+      "method": "GET",
+      "path": "/api/hermes/update/receipt",
+      "source": "src/hermes-agent/hermes_cli/web_routers/actions.py",
+      "line": 521
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/raw",
+      "source": "src/hermes-agent/hermes_cli/web_routers/analytics.py",
+      "line": 33
+    },
+    {
+      "method": "PUT",
+      "path": "/api/config/raw",
+      "source": "src/hermes-agent/hermes_cli/web_routers/analytics.py",
+      "line": 56
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/usage",
+      "source": "src/hermes-agent/hermes_cli/web_routers/analytics.py",
+      "line": 115
+    },
+    {
+      "method": "GET",
+      "path": "/api/analytics/models",
+      "source": "src/hermes-agent/hermes_cli/web_routers/analytics.py",
+      "line": 332
+    },
+    {
+      "method": "POST",
+      "path": "/api/audio/transcribe",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 89
+    },
+    {
+      "method": "GET",
+      "path": "/api/audio/voice-config",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 152
+    },
+    {
+      "method": "GET",
+      "path": "/api/audio/voice-live/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 183
+    },
+    {
+      "method": "POST",
+      "path": "/api/audio/voice-live/session",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 193
+    },
+    {
+      "method": "GET",
+      "path": "/api/audio/elevenlabs/voices",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 223
+    },
+    {
+      "method": "POST",
+      "path": "/api/audio/speak",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 298
+    },
+    {
+      "method": "POST",
+      "path": "/api/audio/tts-lease",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 355
+    },
+    {
+      "method": "POST",
+      "path": "/api/audio/stt-lease",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 492
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/audio/transcribe-stream",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 527
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/audio/speak-stream",
+      "source": "src/hermes-agent/hermes_cli/web_routers/audio.py",
+      "line": 610
+    },
+    {
+      "method": "GET",
+      "path": "/api/chat/workspaces",
+      "source": "src/hermes-agent/hermes_cli/web_routers/chat_workspaces.py",
+      "line": 72
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/console",
+      "source": "src/hermes-agent/hermes_cli/web_routers/chat_ws.py",
+      "line": 241
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/pty",
+      "source": "src/hermes-agent/hermes_cli/web_routers/chat_ws.py",
+      "line": 475
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/ws",
+      "source": "src/hermes-agent/hermes_cli/web_routers/chat_ws.py",
+      "line": 650
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/pub",
+      "source": "src/hermes-agent/hermes_cli/web_routers/chat_ws.py",
+      "line": 728
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/events",
+      "source": "src/hermes-agent/hermes_cli/web_routers/chat_ws.py",
+      "line": 740
+    },
+    {
+      "method": "GET",
+      "path": "/api/config",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 82
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/defaults",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 96
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/schema",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 101
+    },
+    {
+      "method": "GET",
+      "path": "/api/egress/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 114
+    },
+    {
+      "method": "PUT",
+      "path": "/api/config",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 140
+    },
+    {
+      "method": "GET",
+      "path": "/api/env",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 283
+    },
+    {
+      "method": "PUT",
+      "path": "/api/env",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 352
+    },
+    {
+      "method": "GET",
+      "path": "/api/providers/custom-endpoints",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 846
+    },
+    {
+      "method": "POST",
+      "path": "/api/providers/custom-endpoints",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 859
+    },
+    {
+      "method": "POST",
+      "path": "/api/providers/custom-endpoints/{endpoint_id}/activate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 893
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/providers/custom-endpoints/{endpoint_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 947
+    },
+    {
+      "method": "POST",
+      "path": "/api/providers/custom-endpoints/validate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 979
+    },
+    {
+      "method": "POST",
+      "path": "/api/providers/validate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 1124
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/env",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 1194
+    },
+    {
+      "method": "POST",
+      "path": "/api/env/reveal",
+      "source": "src/hermes-agent/hermes_cli/web_routers/config_env.py",
+      "line": 1212
+    },
+    {
+      "method": "GET",
+      "path": "/api/cron/jobs",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 778
+    },
+    {
+      "method": "GET",
+      "path": "/api/cron/jobs/{job_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 783
+    },
+    {
+      "method": "GET",
+      "path": "/api/cron/jobs/{job_id}/runs",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 788
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/jobs",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 793
+    },
+    {
+      "method": "GET",
+      "path": "/api/cron/delivery-targets",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 798
+    },
+    {
+      "method": "PUT",
+      "path": "/api/cron/jobs/{job_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 824
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/jobs/{job_id}/pause",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 829
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/jobs/{job_id}/resume",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 834
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/jobs/{job_id}/trigger",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 839
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/jobs/{job_id}/cancel",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 844
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/cron/jobs/{job_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 849
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/fire",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 854
+    },
+    {
+      "method": "GET",
+      "path": "/api/cron/blueprints",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 973
+    },
+    {
+      "method": "POST",
+      "path": "/api/cron/blueprints/instantiate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/cron.py",
+      "line": 992
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/themes",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 53
+    },
+    {
+      "method": "PUT",
+      "path": "/api/dashboard/theme",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 73
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/font",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 92
+    },
+    {
+      "method": "PUT",
+      "path": "/api/dashboard/font",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 102
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/plugins",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 111
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/plugins/rescan",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 125
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/plugins/hub",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 132
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/plugins/catalog",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 161
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/agent-plugins/install",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/agent-plugins/update-all",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 236
+    },
+    {
+      "method": "GET",
+      "path": "/api/dashboard/plugins/auto-update",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 253
+    },
+    {
+      "method": "PUT",
+      "path": "/api/dashboard/plugins/auto-update",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 260
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/agent-plugins/{name:path}/enable",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 271
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/agent-plugins/{name:path}/disable",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 278
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/agent-plugins/{name:path}/update",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 285
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/dashboard/agent-plugins/{name:path}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 302
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/agent-plugins/activate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 308
+    },
+    {
+      "method": "PUT",
+      "path": "/api/dashboard/plugin-providers",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 335
+    },
+    {
+      "method": "POST",
+      "path": "/api/dashboard/plugins/{name:path}/visibility",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 363
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard-plugins/@{profile}/{plugin_name}/{file_path:path}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 401
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard-plugins/{plugin_name}/{file_path:path}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/dashboard_ui.py",
+      "line": 408
+    },
+    {
+      "method": "GET",
+      "path": "/api/delegation/routing",
+      "source": "src/hermes-agent/hermes_cli/web_routers/delegation.py",
+      "line": 92
+    },
+    {
+      "method": "PUT",
+      "path": "/api/delegation/backend",
+      "source": "src/hermes-agent/hermes_cli/web_routers/delegation.py",
+      "line": 119
+    },
+    {
+      "method": "PUT",
+      "path": "/api/delegation/backends/model_map",
+      "source": "src/hermes-agent/hermes_cli/web_routers/delegation.py",
+      "line": 228
+    },
+    {
+      "method": "PUT",
+      "path": "/api/delegation/backends/profile_routes",
+      "source": "src/hermes-agent/hermes_cli/web_routers/delegation.py",
+      "line": 250
+    },
+    {
+      "method": "GET",
+      "path": "/api/desktop-plugins/root",
+      "source": "src/hermes-agent/hermes_cli/web_routers/desktop_plugins.py",
+      "line": 115
+    },
+    {
+      "method": "POST",
+      "path": "/api/desktop-plugins/reconcile",
+      "source": "src/hermes-agent/hermes_cli/web_routers/desktop_plugins.py",
+      "line": 120
+    },
+    {
+      "method": "GET",
+      "path": "/api/desktop-plugins/list",
+      "source": "src/hermes-agent/hermes_cli/web_routers/desktop_plugins.py",
+      "line": 128
+    },
+    {
+      "method": "GET",
+      "path": "/api/desktop-plugins/read",
+      "source": "src/hermes-agent/hermes_cli/web_routers/desktop_plugins.py",
+      "line": 133
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/display/ws",
+      "source": "src/hermes-agent/hermes_cli/web_routers/display.py",
+      "line": 76
+    },
+    {
+      "method": "GET",
+      "path": "/api/media",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 532
+    },
+    {
+      "method": "GET",
+      "path": "/api/media/proxy",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 599
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat/image-upload",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 695
+    },
+    {
+      "method": "GET",
+      "path": "/api/files",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 743
+    },
+    {
+      "method": "GET",
+      "path": "/api/files/read",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 801
+    },
+    {
+      "method": "POST",
+      "path": "/api/files/ticket",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 894
+    },
+    {
+      "method": "GET",
+      "path": "/api/files/download",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 941
+    },
+    {
+      "method": "GET",
+      "path": "/api/files/stream",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 961
+    },
+    {
+      "method": "POST",
+      "path": "/api/files/upload",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1009
+    },
+    {
+      "method": "POST",
+      "path": "/api/files/upload-stream",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1068
+    },
+    {
+      "method": "POST",
+      "path": "/api/files/mkdir",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1089
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/files",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1100
+    },
+    {
+      "method": "GET",
+      "path": "/api/fs/list",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1148
+    },
+    {
+      "method": "GET",
+      "path": "/api/fs/read-text",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1171
+    },
+    {
+      "method": "POST",
+      "path": "/api/fs/write-text",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1224
+    },
+    {
+      "method": "GET",
+      "path": "/api/fs/read-data-url",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1362
+    },
+    {
+      "method": "GET",
+      "path": "/api/fs/download",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1533
+    },
+    {
+      "method": "GET",
+      "path": "/api/fs/git-root",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1560
+    },
+    {
+      "method": "GET",
+      "path": "/api/fs/default-cwd",
+      "source": "src/hermes-agent/hermes_cli/web_routers/files.py",
+      "line": 1577
+    },
+    {
+      "method": "GET",
+      "path": "/api/gateway-connections",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 41
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 51
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/gateway-connections/{connection_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 63
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/launch-mode",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 75
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/last-used",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 80
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/{connection_id}/primary",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 85
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/{connection_id}/test",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections.py",
+      "line": 90
+    },
+    {
+      "method": "GET",
+      "path": "/api/gateway-connections/{connection_id}/oauth",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 73
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/{connection_id}/oauth/start",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 78
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/{connection_id}/oauth/complete",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 91
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/gateway-connections/{connection_id}/oauth",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 99
+    },
+    {
+      "method": "GET",
+      "path": "/api/gateway-connections/{connection_id}/ssh",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 133
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway-connections/{connection_id}/ssh",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 138
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/gateway-connections/{connection_id}/ssh",
+      "source": "src/hermes-agent/hermes_cli/web_routers/gateway_connections_reach.py",
+      "line": 143
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 50
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/gh-auth",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 84
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/worktrees",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 110
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/branches",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 115
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/base-branches",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 120
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/review/list",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 125
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/review/diff",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 130
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/file-diff",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 141
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/review/commit-context",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 149
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/review/rev-parse",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 157
+    },
+    {
+      "method": "GET",
+      "path": "/api/git/review/ship-info",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 162
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/pr-list",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 167
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/stage",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 172
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/unstage",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 177
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/revert",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 182
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/commit",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 187
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/push",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 192
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/review/create-pr",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 197
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/worktree/add",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 202
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/worktree/remove",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 212
+    },
+    {
+      "method": "POST",
+      "path": "/api/git/branch/switch",
+      "source": "src/hermes-agent/hermes_cli/web_routers/git.py",
+      "line": 219
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 545
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/hardware",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 597
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/catalog",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 676
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/runtime/install",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 722
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/download",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 768
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/download/pause",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 785
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/download/resume",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 798
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/local-models/models/{model_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 807
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/quickstart",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 861
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/server",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 929
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/eject",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 946
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/activate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 964
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/jobs",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 991
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/jobs/{job_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 1001
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/search",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 1011
+    },
+    {
+      "method": "GET",
+      "path": "/api/local-models/search/files",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 1020
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/download-browsed",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 1029
+    },
+    {
+      "method": "POST",
+      "path": "/api/local-models/sideload",
+      "source": "src/hermes-agent/hermes_cli/web_routers/local_models.py",
+      "line": 1052
+    },
+    {
+      "method": "GET",
+      "path": "/api/mcp/servers",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 94
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/servers",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 110
+    },
+    {
+      "method": "PUT",
+      "path": "/api/mcp/servers",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 160
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/mcp/servers/{name}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 183
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/servers/{name}/test",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 204
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/servers/{name}/auth",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 254
+    },
+    {
+      "method": "GET",
+      "path": "/api/mcp/oauth/flows/{flow_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 312
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/mcp/oauth/flows/{flow_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 324
+    },
+    {
+      "method": "GET",
+      "path": "/api/mcp/oauth/callback/{server_name:path}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 338
+    },
+    {
+      "method": "PUT",
+      "path": "/api/mcp/servers/{name}/enabled",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 371
+    },
+    {
+      "method": "GET",
+      "path": "/api/mcp/catalog",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 439
+    },
+    {
+      "method": "POST",
+      "path": "/api/mcp/catalog/install",
+      "source": "src/hermes-agent/hermes_cli/web_routers/mcp.py",
+      "line": 471
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory/providers/{name}/config",
+      "source": "src/hermes-agent/hermes_cli/web_routers/memory_providers.py",
+      "line": 497
+    },
+    {
+      "method": "POST",
+      "path": "/api/memory/providers/{name}/setup",
+      "source": "src/hermes-agent/hermes_cli/web_routers/memory_providers.py",
+      "line": 518
+    },
+    {
+      "method": "PUT",
+      "path": "/api/memory/providers/{name}/config",
+      "source": "src/hermes-agent/hermes_cli/web_routers/memory_providers.py",
+      "line": 541
+    },
+    {
+      "method": "POST",
+      "path": "/api/messaging/whatsapp/onboarding/start",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 702
+    },
+    {
+      "method": "GET",
+      "path": "/api/messaging/whatsapp/onboarding/{pairing_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 752
+    },
+    {
+      "method": "POST",
+      "path": "/api/messaging/whatsapp/onboarding/{pairing_id}/apply",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 761
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/messaging/whatsapp/onboarding/{pairing_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 812
+    },
+    {
+      "method": "POST",
+      "path": "/api/messaging/telegram/onboarding/start",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 877
+    },
+    {
+      "method": "GET",
+      "path": "/api/messaging/telegram/onboarding/{pairing_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 900
+    },
+    {
+      "method": "POST",
+      "path": "/api/messaging/telegram/onboarding/{pairing_id}/apply",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 939
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/messaging/telegram/onboarding/{pairing_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 979
+    },
+    {
+      "method": "GET",
+      "path": "/api/messaging/platforms",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 989
+    },
+    {
+      "method": "PUT",
+      "path": "/api/messaging/platforms/{platform_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 1048
+    },
+    {
+      "method": "POST",
+      "path": "/api/messaging/platforms/{platform_id}/test",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging.py",
+      "line": 1254
+    },
+    {
+      "method": "GET",
+      "path": "/api/messaging/relay",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging_relay.py",
+      "line": 44
+    },
+    {
+      "method": "POST",
+      "path": "/api/messaging/relay/{platform}/link",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging_relay.py",
+      "line": 50
+    },
+    {
+      "method": "GET",
+      "path": "/api/messaging/relay/link/{code}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging_relay.py",
+      "line": 56
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/messaging/relay/{platform}/accounts/{platform_user_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/messaging_relay.py",
+      "line": 61
+    },
+    {
+      "method": "GET",
+      "path": "/api/model/info",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 113
+    },
+    {
+      "method": "GET",
+      "path": "/api/model/options",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 161
+    },
+    {
+      "method": "GET",
+      "path": "/api/model/recommended-default",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 199
+    },
+    {
+      "method": "GET",
+      "path": "/api/model/auxiliary",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 242
+    },
+    {
+      "method": "GET",
+      "path": "/api/model/moa",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 296
+    },
+    {
+      "method": "PUT",
+      "path": "/api/model/moa",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 327
+    },
+    {
+      "method": "POST",
+      "path": "/api/model/set",
+      "source": "src/hermes-agent/hermes_cli/web_routers/models.py",
+      "line": 400
+    },
+    {
+      "method": "GET",
+      "path": "/api/providers/oauth",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 718
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/providers/oauth/{provider_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 774
+    },
+    {
+      "method": "POST",
+      "path": "/api/providers/oauth/{provider_id}/start",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 841
+    },
+    {
+      "method": "POST",
+      "path": "/api/providers/oauth/{provider_id}/submit",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 896
+    },
+    {
+      "method": "GET",
+      "path": "/api/providers/oauth/{provider_id}/poll/{session_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 921
+    },
+    {
+      "method": "GET",
+      "path": "/api/providers/oauth/nous/handoff",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 956
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/providers/oauth/sessions/{session_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/oauth.py",
+      "line": 975
+    },
+    {
+      "method": "GET",
+      "path": "/api/pairing",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 84
+    },
+    {
+      "method": "POST",
+      "path": "/api/pairing/approve",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 91
+    },
+    {
+      "method": "POST",
+      "path": "/api/pairing/revoke",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 120
+    },
+    {
+      "method": "POST",
+      "path": "/api/pairing/clear-pending",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 131
+    },
+    {
+      "method": "GET",
+      "path": "/api/webhooks",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 159
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/enable",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 177
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 207
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/webhooks/{name}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 272
+    },
+    {
+      "method": "PUT",
+      "path": "/api/webhooks/{name}/enabled",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 288
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway/start",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 310
+    },
+    {
+      "method": "POST",
+      "path": "/api/gateway/stop",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 323
+    },
+    {
+      "method": "GET",
+      "path": "/api/credentials/pool",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 365
+    },
+    {
+      "method": "POST",
+      "path": "/api/credentials/pool",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 394
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/credentials/pool/{provider}/{index}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 456
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 516
+    },
+    {
+      "method": "PUT",
+      "path": "/api/memory/provider",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 532
+    },
+    {
+      "method": "POST",
+      "path": "/api/memory/reset",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 553
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/doctor",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 581
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/security-audit",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 587
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/backup",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 601
+    },
+    {
+      "method": "GET",
+      "path": "/api/ops/backup/download",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 636
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/import",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 660
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/import-upload",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 679
+    },
+    {
+      "method": "GET",
+      "path": "/api/ops/hooks",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 704
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/hooks",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 753
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ops/hooks",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 804
+    },
+    {
+      "method": "GET",
+      "path": "/api/ops/checkpoints",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 839
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/checkpoints/prune",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ops.py",
+      "line": 869
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/sessions",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 397
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/sessions/sidebar",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 469
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/projects/tree",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 669
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles/sessions/pull-requests",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 722
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 760
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 765
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/active",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 812
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles/active",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 833
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/{name}/setup-command",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 844
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles/{name}/open-terminal",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 865
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/profiles/{name}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 887
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/profiles/{name}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 906
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/{name}/soul",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 927
+    },
+    {
+      "method": "PUT",
+      "path": "/api/profiles/{name}/soul",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 942
+    },
+    {
+      "method": "PUT",
+      "path": "/api/profiles/{name}/description",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 964
+    },
+    {
+      "method": "PUT",
+      "path": "/api/profiles/{name}/model",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 978
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles/{name}/describe-auto",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 994
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles/{name}/export",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 1025
+    },
+    {
+      "method": "POST",
+      "path": "/api/profiles/import",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 1043
+    },
+    {
+      "method": "GET",
+      "path": "/api/profiles/{name}/desktop-overlay",
+      "source": "src/hermes-agent/hermes_cli/web_routers/profiles.py",
+      "line": 1072
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 205
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/search",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 314
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/bulk-delete",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 499
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/import",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 536
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/empty/count",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 555
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/sessions/empty",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 563
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/stats",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 589
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 613
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}/mutation-snapshot",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 640
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}/latest-descendant",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 659
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}/messages",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 803
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}/timeline",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 866
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}/messages/around",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 891
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/sessions/{session_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 916
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/owner-backfill",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 960
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/sessions/{session_id}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 996
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{session_id}/export",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 1011
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/prune",
+      "source": "src/hermes-agent/hermes_cli/web_routers/sessions.py",
+      "line": 1046
+    },
+    {
+      "method": "GET",
+      "path": "/api/shared-metrics/consent",
+      "source": "src/hermes-agent/hermes_cli/web_routers/shared_metrics.py",
+      "line": 34
+    },
+    {
+      "method": "PUT",
+      "path": "/api/shared-metrics/consent",
+      "source": "src/hermes-agent/hermes_cli/web_routers/shared_metrics.py",
+      "line": 39
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/hub/install",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 96
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/hub/uninstall",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 106
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/hub/update",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 116
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/hub/updates",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 124
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/hub/official",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 141
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/hub/sources",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 165
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/hub/search",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 203
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/hub/preview",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 245
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/hub/scan",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 283
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 360
+    },
+    {
+      "method": "PUT",
+      "path": "/api/skills/lock",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 412
+    },
+    {
+      "method": "PUT",
+      "path": "/api/skills/toggle",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 435
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills/content",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 453
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 474
+    },
+    {
+      "method": "PUT",
+      "path": "/api/skills/content",
+      "source": "src/hermes-agent/hermes_cli/web_routers/skills.py",
+      "line": 489
+    },
+    {
+      "method": "GET",
+      "path": "/api/ssh/ownership",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 113
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 123
+    },
+    {
+      "method": "GET",
+      "path": "/api/host/identity",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 137
+    },
+    {
+      "method": "GET",
+      "path": "/api/health/idle",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 166
+    },
+    {
+      "method": "POST",
+      "path": "/api/health/retirement",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 176
+    },
+    {
+      "method": "GET",
+      "path": "/api/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 558
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/stats",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 674
+    },
+    {
+      "method": "GET",
+      "path": "/api/curator",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 734
+    },
+    {
+      "method": "PUT",
+      "path": "/api/curator/paused",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 754
+    },
+    {
+      "method": "POST",
+      "path": "/api/curator/run",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 773
+    },
+    {
+      "method": "GET",
+      "path": "/api/learning/graph",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 782
+    },
+    {
+      "method": "GET",
+      "path": "/api/learning/node",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 809
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/learning/node",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 816
+    },
+    {
+      "method": "PUT",
+      "path": "/api/learning/node",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 827
+    },
+    {
+      "method": "GET",
+      "path": "/api/portal",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 838
+    },
+    {
+      "method": "GET",
+      "path": "/api/cloud/agents",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 845
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/prompt-size",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 899
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/dump",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 904
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/config-migrate",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 909
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/debug-share",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 914
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs",
+      "source": "src/hermes-agent/hermes_cli/web_routers/status.py",
+      "line": 946
+    },
+    {
+      "method": "GET",
+      "path": "/api/tools/toolsets",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 224
+    },
+    {
+      "method": "PUT",
+      "path": "/api/tools/toolsets/{name}",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 274
+    },
+    {
+      "method": "GET",
+      "path": "/api/tools/toolsets/{name}/config",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 339
+    },
+    {
+      "method": "GET",
+      "path": "/api/tools/toolsets/{name}/models",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 425
+    },
+    {
+      "method": "PUT",
+      "path": "/api/tools/toolsets/{name}/model",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 465
+    },
+    {
+      "method": "PUT",
+      "path": "/api/tools/toolsets/{name}/provider",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 497
+    },
+    {
+      "method": "PUT",
+      "path": "/api/tools/toolsets/{name}/env",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 582
+    },
+    {
+      "method": "POST",
+      "path": "/api/tools/toolsets/{name}/post-setup",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 622
+    },
+    {
+      "method": "GET",
+      "path": "/api/tools/terminal/backends",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 646
+    },
+    {
+      "method": "PUT",
+      "path": "/api/tools/terminal/backend",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 673
+    },
+    {
+      "method": "GET",
+      "path": "/api/tools/computer-use/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 697
+    },
+    {
+      "method": "POST",
+      "path": "/api/tools/computer-use/permissions/grant",
+      "source": "src/hermes-agent/hermes_cli/web_routers/tools.py",
+      "line": 706
+    },
+    {
+      "method": "GET",
+      "path": "/api/ops/backup/chunk",
+      "source": "src/hermes-agent/hermes_cli/web_routers/transfer.py",
+      "line": 83
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/transfer/chunk",
+      "source": "src/hermes-agent/hermes_cli/web_routers/transfer.py",
+      "line": 126
+    },
+    {
+      "method": "POST",
+      "path": "/api/ops/transfer/restore",
+      "source": "src/hermes-agent/hermes_cli/web_routers/transfer.py",
+      "line": 154
+    },
+    {
+      "method": "GET",
+      "path": "/api/ui-preferences",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ui_preferences.py",
+      "line": 30
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ui-preferences",
+      "source": "src/hermes-agent/hermes_cli/web_routers/ui_preferences.py",
+      "line": 38
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat/file-upload",
+      "source": "src/hermes-agent/hermes_cli/web_routers/uploads.py",
+      "line": 22
+    },
+    {
+      "method": "WEBSOCKET",
+      "path": "/api/host-terminal",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp.py",
+      "line": 41
+    },
+    {
+      "method": "POST",
+      "path": "/api/webapp/window-ticket",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp.py",
+      "line": 155
+    },
+    {
+      "method": "POST",
+      "path": "/api/webapp/socket-ticket",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp.py",
+      "line": 228
+    },
+    {
+      "method": "POST",
+      "path": "/webapp/window-session",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp.py",
+      "line": 254
+    },
+    {
+      "method": "GET",
+      "path": "/webapp/launch",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp.py",
+      "line": 338
+    },
+    {
+      "method": "GET",
+      "path": "/webapp/window",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp.py",
+      "line": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/webapp-access/status",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp_access.py",
+      "line": 172
+    },
+    {
+      "method": "POST",
+      "path": "/api/webapp-access/start",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp_access.py",
+      "line": 198
+    },
+    {
+      "method": "POST",
+      "path": "/api/webapp-access/stop",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp_access.py",
+      "line": 238
+    },
+    {
+      "method": "POST",
+      "path": "/api/webapp-access/restart",
+      "source": "src/hermes-agent/hermes_cli/web_routers/webapp_access.py",
+      "line": 252
+    }
+  ]
+}

@@ -1,4 +1,6 @@
 export enum QueryKeys {
+  hermesStatus = 'hermesStatus',
+  hermesProfiles = 'hermesProfiles',
   slackApps = 'slackApps',
   slackWorkspaces = 'slackWorkspaces',
   agentChannelWorkspaceRoutes = 'agentChannelWorkspaceRoutes',

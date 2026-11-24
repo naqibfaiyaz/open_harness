@@ -21,6 +21,7 @@ const HEADER_SPAN_ATTRIBUTE = /^http\.(?:request|response)\.header\.(.+)$/i;
 const CREDENTIAL_HEADER = /authorization|cookie|apikey|token|signature/i;
 const BODY_SPAN_ATTRIBUTE = /^http\.(?:request|response)\.body$/i;
 const CREDENTIAL_ROUTES = [
+  /\/(?:api\/hermes|hermes-workspace)(?:\/|$)/i,
   /\/oauth\/(?:google|facebook|openid|github|discord|apple|saml)(?:\/callback)?\/?$/i,
   /\/api\/(?:auth|keys|api-keys)(?:\/|$)/i,
   /\/api\/user\/(?:verify|email)(?:\/|$)/i,
@@ -62,6 +63,7 @@ export function isCredentialRequest(attributes: SpanAttributes): boolean {
 
 export function isReplayRouteAllowed(pathname: string): boolean {
   try {
+    if (/\/(?:hermes|hermes-workspace)(?:\/|$)/i.test(decodeURI(pathname))) return false;
     return pathname !== '/' && !AUTH_ROUTE.test(decodeURI(pathname));
   } catch {
     return false;

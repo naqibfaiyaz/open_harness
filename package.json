@@ -1,0 +1,11 @@
+{
+  "name": "open-harness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:integration": "node --import tsx --test tests/hermes.integration.test.ts",
+    "typecheck:integration": "node src/LibreChat/node_modules/typescript/bin/tsc -p tests/tsconfig.hermes.json",
+    "capabilities": "node tools/catalog-capabilities.cjs"
+  },
+  "devDependencies": { "tsx": "4.21.0" }
+}

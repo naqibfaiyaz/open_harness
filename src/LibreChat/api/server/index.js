@@ -25,6 +25,9 @@ const {
   ErrorController,
   memoryDiagnostics,
   createSecurityHeaders,
+  createHermesIntegration,
+  createHermesBodyCapture,
+  createHermesRequestSanitizer,
   performStartupChecks,
   handleJsonParseError,
   excludeRumBodyParser,
@@ -77,6 +80,7 @@ const {
   updateAccessPermissions,
   sweepOrphanedPreviews,
   getRoleByName,
+  getUserById,
   seedDatabase,
   initializeFavorites,
   closeFavorites,
@@ -389,8 +393,13 @@ const startServer = async () => {
   app.use('/api/agents/chat', agentStartupIngressMiddleware);
   app.use(metricsMiddleware);
   app.use(noIndex);
-  app.use(excludeRumBodyParser(express.json({ limit: '3mb' })));
-  app.use(excludeRumBodyParser(express.urlencoded({ extended: true, limit: '3mb' })));
+  const captureHermesBody = createHermesBodyCapture(appConfig.config?.hermes?.enabled === true);
+  app.use(excludeRumBodyParser(express.json({ limit: '3mb', verify: captureHermesBody })));
+  app.use(
+    excludeRumBodyParser(
+      express.urlencoded({ extended: true, limit: '3mb', verify: captureHermesBody }),
+    ),
+  );
   app.use(handleJsonParseError);
 
   /**
@@ -406,7 +415,12 @@ const startServer = async () => {
     next();
   });
 
-  app.use(createRequestSanitizer(mongoSanitize));
+  app.use(
+    createHermesRequestSanitizer(
+      createRequestSanitizer(mongoSanitize),
+      appConfig.config?.hermes?.enabled === true,
+    ),
+  );
   app.use(cors());
   app.use(cookieParser());
 
@@ -446,6 +460,33 @@ const startServer = async () => {
 
   /* Per-request capability cache — must be registered before any route that calls hasCapability */
   app.use(capabilityContextMiddleware);
+
+  // Hermes remains the resource and execution owner. Legacy code only wires the TS integration.
+  const hermesConfig = appConfig.config?.hermes;
+  const hermesIntegration = hermesConfig?.enabled
+    ? createHermesIntegration({
+        config: hermesConfig,
+        secrets: {
+          dashboardUsername: process.env.HERMES_DASHBOARD_USERNAME ?? '',
+          dashboardPassword: process.env.HERMES_DASHBOARD_PASSWORD ?? '',
+          dashboardProvider: process.env.HERMES_DASHBOARD_PROVIDER ?? 'basic',
+          runtimeKey: process.env.HERMES_API_KEY ?? '',
+          bridgeKey: process.env.HERMES_BRIDGE_KEY ?? '',
+        },
+        authenticate: require('./middleware/requireJwtAuth'),
+        loadUser: async (id) => (await getUserById(id, 'id role')) ?? undefined,
+      })
+    : undefined;
+  if (hermesIntegration) {
+    app.use('/api/hermes/runtime/v1', hermesIntegration.executor);
+    app.use('/api/hermes', hermesIntegration.api);
+    app.use('/hermes-workspace', hermesIntegration.workspace);
+    app.use(['/api/ask', '/api/agents/chat', '/api/assistants'], hermesIntegration.executionGuard);
+  } else {
+    app.get('/api/hermes/status', require('./middleware/requireJwtAuth'), (_req, res) =>
+      res.json({ enabled: false, managedOnly: false, canManage: false }),
+    );
+  }
 
   /* Pre-auth tenant context for unauthenticated routes that need tenant scoping.
    * The reverse proxy / auth gateway sets `X-Tenant-Id` header for multi-tenant deployments. */
@@ -604,6 +645,13 @@ const startServer = async () => {
   });
 
   configureServerTimeouts(server);
+  if (hermesIntegration) {
+    const closeHermesSockets = hermesIntegration.attach(server);
+    registerShutdownTask('hermes workspace sockets', closeHermesSockets, {
+      phase: 'pre-drain',
+      priority: 100,
+    });
+  }
   logger.info('HTTP server timeout configuration', {
     keepAliveTimeout: server.keepAliveTimeout,
     keepAliveTimeoutBuffer: server.keepAliveTimeoutBuffer,

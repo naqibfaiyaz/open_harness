@@ -1,0 +1,23 @@
+# Apply AFTER compose.yaml (and any existing features/HTTPS overrides).
+services:
+  librechat:
+    image: open-harness/librechat-hermes:pilot
+    build:
+      context: ../src/LibreChat
+      dockerfile: Dockerfile
+      args:
+        NODE_MAX_OLD_SPACE_SIZE: "8192"
+    environment:
+      HERMES_BRIDGE_KEY: ${HERMES_BRIDGE_KEY:?Run tools/prepare-integration.cjs first}
+      HERMES_API_KEY: ${HERMES_API_KEY:?Missing Hermes gateway key}
+      HERMES_DASHBOARD_USERNAME: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME:?Missing dashboard username}
+      HERMES_DASHBOARD_PASSWORD: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD:?Missing dashboard password}
+      HERMES_DASHBOARD_PROVIDER: basic
+    volumes:
+      - ./integration.librechat.yaml:/app/librechat.yaml:ro
+  hermes:
+    environment:
+      GATEWAY_MULTIPLEX_PROFILES: "true"
+      HERMES_DASHBOARD_PUBLIC_URL: ${DOMAIN_CLIENT:?Missing public LibreChat origin}/hermes-workspace
+      # Applies to profile adapters as well; keys remain profile scoped.
+      API_SERVER_ENABLED: "true"
