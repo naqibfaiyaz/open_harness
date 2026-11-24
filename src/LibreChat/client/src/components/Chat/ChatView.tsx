@@ -202,8 +202,8 @@ function ChatViewPane({
                                       chat.conversation?.conversationId ?? conversationId
                                     }
                                     turn={
-                                      rootSubmission?.userMessage.responseMessageId ??
-                                      rootSubmission?.userMessage.messageId
+                                      rootSubmission?.userMessage?.responseMessageId ??
+                                      rootSubmission?.userMessage?.messageId
                                     }
                                     active={chat.isSubmitting}
                                   />

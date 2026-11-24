@@ -46,7 +46,7 @@ export function useHermesProgress(
         signal,
       ),
     {
-      enabled: enabled && !!token && !!conversation && conversation !== 'new' && !!turn,
+      enabled: !!enabled && !!token && !!conversation && conversation !== 'new' && !!turn,
       refetchInterval: enabled ? 1000 : false,
       refetchOnWindowFocus: false,
       retry: false,

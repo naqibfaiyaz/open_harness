@@ -93,6 +93,13 @@ describe('ChatView page heading', () => {
     mockConversation.mockReturnValue(null);
   });
 
+  test('renders an empty Hermes chat before a submission exists', () => {
+    mockConversation.mockReturnValue({ conversationId: 'new', endpoint: 'Hermes' });
+    render(<ChatView />);
+    expect(screen.getByRole('heading', { level: 1, name: 'New chat' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
   test('exposes a single h1 to assistive technology', () => {
     render(<ChatView />);
 
