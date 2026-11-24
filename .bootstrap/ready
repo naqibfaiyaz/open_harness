@@ -1,0 +1,2 @@
+Pinned LibreChat and Hermes sources plus locally validated integration b22d9bfa.
+139 focused tests passed. Full builds and TypeScript checks passed. See docs/verification.md after import.

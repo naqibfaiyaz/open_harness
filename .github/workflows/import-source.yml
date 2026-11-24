@@ -36,10 +36,10 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git clone --no-checkout --filter=blob:none https://github.com/LibreChat-AI/LibreChat.git "$RUNNER_TEMP/librechat-source"
+          git clone --no-checkout --filter=blob:none --depth=1 https://github.com/LibreChat-AI/LibreChat.git "$RUNNER_TEMP/librechat-source"
           git -C "$RUNNER_TEMP/librechat-source" fetch --depth=1 origin d4e85d2205c78413ee27d631d7e3b7313556f21d
           git -C "$RUNNER_TEMP/librechat-source" checkout --detach d4e85d2205c78413ee27d631d7e3b7313556f21d
-          git clone --no-checkout --filter=blob:none https://github.com/NousResearch/hermes-agent.git "$RUNNER_TEMP/hermes-source"
+          git clone --no-checkout --filter=blob:none --depth=1 https://github.com/NousResearch/hermes-agent.git "$RUNNER_TEMP/hermes-source"
           git -C "$RUNNER_TEMP/hermes-source" fetch --depth=1 origin caafe5389ae585ef77387a962aee05b1bcf17029
           git -C "$RUNNER_TEMP/hermes-source" checkout --detach caafe5389ae585ef77387a962aee05b1bcf17029
           mkdir -p src/LibreChat src/hermes-agent deployment

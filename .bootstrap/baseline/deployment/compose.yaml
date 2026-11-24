@@ -1,0 +1,65 @@
+name: librechat-hermes-pilot
+services:
+  librechat:
+    image: registry.librechat.ai/librechat-ai/librechat@sha256:51550d041e298f0740d98743a3ffdeac9be4cf6dcb1bcd938e6db8779c420fc4
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      CONFIG_PATH: /app/librechat.yaml
+    ports:
+      - 127.0.0.1:3080:3080
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./.env:/app/.env:ro
+      - librechat_uploads:/app/uploads
+      - librechat_logs:/app/logs
+      - librechat_images:/app/client/public/images
+      - librechat_data:/app/data
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks: [app, data, agent]
+  mongodb:
+    image: mongo:8.0.20
+    restart: unless-stopped
+    command: [mongod, --noauth, --bind_ip_all]
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [data]
+  hermes:
+    image: nousresearch/hermes-agent@sha256:41468459379a943cf0a25a55589e230d244bd9f95b83cff5eca789470c892fac
+    restart: unless-stopped
+    environment:
+      API_SERVER_ENABLED: 'true'
+      API_SERVER_HOST: 0.0.0.0
+      API_SERVER_PORT: '8642'
+      API_SERVER_KEY: '${HERMES_API_KEY}'
+      HERMES_DASHBOARD: '1'
+      HERMES_DASHBOARD_HOST: 0.0.0.0
+      HERMES_DASHBOARD_PORT: '9119'
+      HERMES_DASHBOARD_BASIC_AUTH_USERNAME: '${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}'
+      HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}'
+    command: [gateway, run]
+    ports:
+      - 127.0.0.1:9119:9119
+      - 127.0.0.1:8642:8642
+    volumes:
+      - hermes_data:/opt/data
+    networks: [agent]
+volumes:
+  mongo_data:
+  librechat_uploads:
+  librechat_logs:
+  librechat_images:
+  librechat_data:
+  hermes_data:
+networks:
+  app: {}
+  data:
+    internal: true
+  agent: {}

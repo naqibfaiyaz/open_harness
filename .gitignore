@@ -1,0 +1,16 @@
+.env
+.env.local
+dashboard-login.txt
+*.pem
+node_modules/
+data/
+logs/
+dist/
+tests/*.log
+tests/.mongo-binaries/
+deployment/integration.librechat.yaml
+src/LibreChat/e2e/.generated/
+.lighthouse/
+.test-results/
+junit.xml
+*.tsbuildinfo

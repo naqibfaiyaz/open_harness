@@ -1,0 +1,78 @@
+UPDATE: Public HTTPS is live; use PublicAccess.txt for current access instructions. Legacy tunnel instructions below remain optional.
+
+LibreChat + Hermes EC2 pilot
+
+Region: ca-central-1 (Canada Central)
+Instance: i-03a2c308345461f07
+Type: t3.xlarge, 4 vCPU, 16 GiB; standard CPU credits
+Disk: 80 GiB encrypted gp3; deleted on instance termination
+Server directory: /opt/librechat-hermes
+Security group: sg-07ee20229c573d8cf; inbound TCP 80/443 for Caddy HTTPS
+Management: Systems Manager, with an SSM-only instance role
+
+Access
+LibreChat: http://localhost:3080
+Hermes: http://localhost:9119
+These URLs work through local Systems Manager tunnels, not directly over the internet.
+Tunnels were opened during setup. They may expire or close when this session or computer exits.
+For reconnection with an authenticated AWS CLI, run Connect.ps1 in two terminals:
+  ./Connect.ps1 -Service LibreChat
+  ./Connect.ps1 -Service Hermes
+Alternatively ask Codex to reopen both Systems Manager tunnels.
+
+First use
+1. Sign in to Hermes using the private dashboard-login.txt from the original Codex outputs; credentials are not copied into this source folder.
+2. In Hermes provider/model settings, configure your OpenAI-compatible base URL,
+   model ID, and API key. Use the custom/OpenAI-compatible provider option.
+3. For endpoints running on your own computer, localhost on EC2 is not your computer.
+   Use a reachable HTTPS endpoint or arrange a separate private connection.
+4. Create your own LibreChat account at localhost:3080, then select Hermes.
+5. Send a short test. Upstream inference cannot be tested until you configure it.
+
+Configuration
+LibreChat v0.8.9 and Hermes v0.23.3 images are pinned to amd64 image digests.
+LibreChat talks to Hermes at http://hermes:8642/v1 with a generated internal key.
+MongoDB is on an isolated Docker network, with no host port.
+Hermes has its own persistent data volume and no Docker socket or host workspace mount.
+Hermes tools run in its container; this is a trusted single-operator pilot, not a
+shared untrusted code execution service. RAG services and a dedicated Code Interpreter
+were not deployed in this initial hosting step.
+Your upstream provider controls inference residency. Hosting the interface in Canada
+does not ensure that a provider endpoint performs inference in Canada.
+
+Server commands (use the AWS Systems Manager browser terminal)
+  cd /opt/librechat-hermes
+  sudo docker compose ps
+  sudo docker compose logs --tail 100 librechat
+  sudo docker compose logs --tail 100 hermes
+  sudo docker compose restart hermes
+  sudo docker compose down
+Do not add -v to down unless you intend to delete persistent application data.
+
+An interactive alternative for configuring Hermes:
+  sudo docker compose exec --user hermes hermes hermes model
+
+Data and secrets
+Generated internal secrets are in /opt/librechat-hermes/.env (root-readable).
+Hermes dashboard login is in /opt/librechat-hermes/dashboard-login.txt.
+Provider credentials entered in Hermes stay in its data volume.
+Treat dashboard-login.txt and the Hermes data volume as private.
+No scheduled backups have been configured. Take a consistent backup before upgrades.
+
+Cost
+Verified EC2 price: US$0.1856/hour; US$135.488 at 730 hours/month.
+Allow roughly US$150-170/month with disk and basic networking, excluding model API
+usage, substantial transfer, CPU-credit changes, taxes, and backups.
+Stop the EC2 instance in AWS when unused to stop compute billing. EBS remains billed.
+Terminating the instance deletes its root volume and the Docker data on that volume.
+
+Validation
+Both web interfaces returned HTTP 200 over the private tunnels.
+MongoDB reported healthy.
+LibreChat's container authenticated to Hermes /v1/models and received HTTP 200
+with the hermes-agent model. Upstream model generation remains untested pending
+your provider setup.
+The initial cloud-init run recorded a trailing CR character after all services
+started. The stored bootstrap script was normalized and syntax-checked afterward.
+
+

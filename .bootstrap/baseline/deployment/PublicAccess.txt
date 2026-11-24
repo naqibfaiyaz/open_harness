@@ -1,0 +1,22 @@
+Public HTTPS access is live
+
+LibreChat: https://chat.16-52-156-144.sslip.io
+Hermes: https://hermes.16-52-156-144.sslip.io
+
+Hermes uses the pilot username and generated password saved in the private
+Codex output dashboard-login.txt. Credentials are not included in this source folder.
+HTTP Basic Auth has been removed. LibreChat lets you create/sign in
+to your own LibreChat account. Hermes uses its own login form with the same pilot credentials.
+Configure your upstream OpenAI-compatible endpoint, model, and key in Hermes.
+
+AWS: ca-central-1 / i-03a2c308345461f07
+Caddy terminates HTTPS and renews certificates automatically.
+Only TCP ports 80 and 443 are publicly open. MongoDB and port 8642 remain private.
+These IP-based hostnames require the current public IP; stopping and starting
+this instance may change the IP and require hostname/certificate updates.
+
+Deployment: run bootstrap.sh, then enable-public-https.sh on the server.
+The latter assumes the current IP hostnames. Its security group also needs 80/443.
+The currently deployed proxy override is /opt/librechat-hermes/compose.override.yaml.
+No Git remote push was performed; the files and upstream source snapshots were copied here.
+
