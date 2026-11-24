@@ -38,7 +38,7 @@ rollback() {
     echo 'Verification failed; restoring the previous deployment.' >&2
     cp "$backup/.env" "$ROOT/.env"
     for file in integration.librechat.yaml compose.autodeploy.yaml; do
-      if test -f "$backup/$file"; then cp "$backup/$file" "$ROOT/$file"; fi
+      if test -f "$backup/$file"; then cp "$backup/$file" "$ROOT/$file"; else rm -f "$ROOT/$file"; fi
     done
     "${old[@]}" up -d --no-deps --no-build --pull never librechat hermes >/dev/null || true
   fi
@@ -77,6 +77,8 @@ config = {'services': {'librechat': {'image': image, 'labels': {'io.open-harness
   'HERMES_DASHBOARD_PASSWORD': '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}', 'HERMES_DASHBOARD_PROVIDER': 'basic'},
   'volumes': ['./integration.librechat.yaml:/app/librechat.yaml:ro']},
   'hermes': {'environment': {'GATEWAY_MULTIPLEX_PROFILES':'true','API_SERVER_ENABLED':'true',
+  'HERMES_DASHBOARD_BASIC_AUTH_USERNAME': '${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}',
+  'HERMES_DASHBOARD_BASIC_AUTH_PASSWORD': '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}',
   'HERMES_DASHBOARD_PUBLIC_URL': '${DOMAIN_CLIENT}/hermes-workspace'}}}}
 (release/'compose.autodeploy.yaml').write_text(json.dumps(config, indent=2) + '\n')
 PY
@@ -97,7 +99,12 @@ admin=$("${current[@]}" exec -T mongodb mongosh --quiet LibreChat --eval 'const 
 [[ "$admin" =~ ^[a-f0-9]{24}$ ]]
 container=$("${current[@]}" ps -q librechat)
 docker cp "$release/deployment/verify-live.cjs" "$container:/tmp/open-harness-verify.cjs"
-docker exec --user 0 "$container" node /tmp/open-harness-verify.cjs "$admin" "$ORIGIN"
+verified=0
+for attempt in $(seq 1 20); do
+  if docker exec --user 0 "$container" node /tmp/open-harness-verify.cjs "$admin" "$ORIGIN"; then verified=1; break; fi
+  sleep 5
+done
+test "$verified" = 1
 curl --fail --silent --max-time 15 "$ORIGIN/health" >/dev/null
 python3 - "$ROOT" "$commit" "$IMAGE" <<'PY'
 import datetime, json, pathlib, sys
