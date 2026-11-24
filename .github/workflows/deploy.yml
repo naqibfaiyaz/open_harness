@@ -80,7 +80,7 @@ jobs:
           command_id=$(aws ssm send-command --document-name "$SSM_DOCUMENT" --instance-ids "$INSTANCE_ID" \
             --parameters "CommitSha=$GITHUB_SHA,ImageDigest=$RELEASE_DIGEST" \
             --comment "Open Harness $GITHUB_SHA" --query Command.CommandId --output text)
-          for attempt in $(seq 1 100); do
+          for attempt in $(seq 1 210); do
             status=$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$INSTANCE_ID" --query Status --output text 2>/dev/null || echo Pending)
             case "$status" in
               Success)

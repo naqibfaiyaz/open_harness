@@ -29,7 +29,7 @@ if test -f "$ROOT/compose.autodeploy.yaml"; then old+=(-f "$ROOT/compose.autodep
 current=("${base[@]}" -f "$ROOT/compose.autodeploy.yaml")
 aws_cli() {
   if command -v aws >/dev/null; then aws "$@";
-  else docker run --rm --network host public.ecr.aws/aws-cli/aws-cli:2 "$@"; fi
+  else docker run --rm --network host public.ecr.aws/aws-cli/aws-cli@sha256:6c24ad4e8cdf12defd41c7e6d2ed836e73da9cbfecc1e9d7fd148bb9f4ea5eb2 "$@"; fi
 }
 rollback() {
   code=$?
