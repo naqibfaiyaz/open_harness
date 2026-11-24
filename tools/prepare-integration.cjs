@@ -18,7 +18,9 @@ config.endpoints = { agents: { capabilities: ['tools', 'artifacts'], disableBuil
     models: { default: ['Agent: default'], fetch: true },
     headers: { 'X-LibreChat-User-Id': '{{LIBRECHAT_USER_ID}}',
       'X-LibreChat-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
-    titleConvo: false, summarize: false, modelDisplayLabel: 'Hermes' }] };
+    titleConvo: true, titleTiming: 'immediate', titleMethod: 'completion',
+    titleModel: '__hermes_chat_title__', titlePrompt: '{convo}', titlePromptTemplate: '{input}',
+    summarize: false, modelDisplayLabel: 'Hermes' }] };
 config.memory = { disabled: true };
 delete config.webSearch;
 delete config.mcpServers;
@@ -52,6 +54,7 @@ for (const key of ['JWT_SECRET', 'JWT_REFRESH_SECRET', 'CREDS_KEY', 'HERMES_API_
 set('CREDS_IV', randomBytes(16).toString('hex'));
 set('ALLOW_SHARED_LINKS', 'true', true);
 set('ALLOW_SHARED_LINKS_PUBLIC', 'true', true);
+set('TITLE_CONVO', 'true', true);
 set('DOMAIN_CLIENT', publicURL.origin, true); set('DOMAIN_SERVER', publicURL.origin, true);
 set('LIBRECHAT_PUBLIC_HOST', publicURL.host, true);
 fs.writeFileSync(file, env.replace(/^\n/, ''), { mode: 0o600 });

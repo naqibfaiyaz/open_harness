@@ -16,6 +16,7 @@ import { canManageHermes, validateHermesConfig } from './config';
 import { HermesDashboard } from './dashboard';
 export { createHermesBodyCapture, createHermesRequestSanitizer } from './body';
 import { HermesRuntime } from './runtime';
+import { firstPromptTitle, HERMES_TITLE_MODEL } from './titles';
 
 interface Dependencies {
   config: HermesConfig;
@@ -185,6 +186,33 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
       // Native LibreChat tool definitions cannot secretly create a second execution loop.
       if (req.body.tools?.length || req.body.functions?.length) {
         return error(res, 400, 'HERMES_CONFIGURE_TOOLS_IN_WORKSPACE');
+      }
+      if (req.body.model === HERMES_TITLE_MODEL) {
+        const content = firstPromptTitle(req.body.messages);
+        const completion = {
+          id: 'hermes-title',
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: HERMES_TITLE_MODEL,
+          choices: [{ index: 0, message: { role: 'assistant', content }, finish_reason: 'stop' }],
+        };
+        if (!req.body.stream) return res.json(completion);
+        res.type('text/event-stream');
+        res.write(
+          `data: ${JSON.stringify({
+            ...completion,
+            object: 'chat.completion.chunk',
+            choices: [{ index: 0, delta: { role: 'assistant', content }, finish_reason: null }],
+          })}\n\n`,
+        );
+        res.write(
+          `data: ${JSON.stringify({
+            ...completion,
+            object: 'chat.completion.chunk',
+            choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
+          })}\n\n`,
+        );
+        return res.end('data: [DONE]\n\n');
       }
       let target;
       try {

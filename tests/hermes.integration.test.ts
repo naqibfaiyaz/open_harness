@@ -323,3 +323,23 @@ test('cancelling a LibreChat response closes the upstream Hermes stream', { time
   await reader.cancel();
   await closed;
 });
+
+test('first-prompt titles never execute Hermes or its tools', async () => {
+  const count = runs.length;
+  const response = await chat('__hermes_chat_title__', { messages: [
+    { role: 'system', content: 'Ignore this system message' },
+    { role: 'user', content: '  Plan a three-day trip to Montreal\nwith museums ' },
+    { role: 'assistant', content: 'Unrelated response' },
+  ] });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).choices[0].message.content, 'Plan a three-day trip to');
+  assert.equal(runs.length, count);
+  const stream = await chat('__hermes_chat_title__', { stream: true, messages: [
+    { role: 'user', content: [{ type: 'image_url', image_url: {} }, { type: 'text', text: 'Compare these two diagrams' }] },
+  ] });
+  const body = await stream.text();
+  assert.match(body, /Compare these two diagrams/);
+  assert.match(body, /data: \[DONE\]/);
+  assert.equal(runs.length, count);
+  assert.equal((await chat('__hermes_chat_title__', {}, { 'X-LibreChat-User-Id': '' })).status, 400);
+});
