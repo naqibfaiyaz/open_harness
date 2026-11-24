@@ -100,9 +100,9 @@ describe('SVG artifact template mapping (#16087)', () => {
 });
 
 describe('buildSandpackOptions', () => {
-  it('includes externalResources with .js fragment hint for static template', () => {
+  it('preserves standalone HTML styling without injecting a framework reset', () => {
     const options = buildSandpackOptions('static');
-    expect(options?.externalResources).toEqual([TAILWIND_CDN]);
+    expect(options?.externalResources).toEqual([]);
   });
 
   it('includes externalResources for react-ts template', () => {
@@ -116,7 +116,7 @@ describe('buildSandpackOptions', () => {
     >[1];
     const options = buildSandpackOptions('static', config);
     expect(options?.bundlerURL).toBe('https://static.example.com');
-    expect(options?.externalResources).toEqual([TAILWIND_CDN]);
+    expect(options?.externalResources).toEqual([]);
   });
 
   it('uses bundlerURL when template is react-ts and config is provided', () => {
@@ -138,7 +138,7 @@ describe('buildSandpackOptions', () => {
     (template) => {
       const options = buildSandpackOptions(template, { bundlerURL: '', staticBundlerURL: '' });
       expect(options?.bundlerURL).toBeUndefined();
-      expect(options?.externalResources).toEqual([TAILWIND_CDN]);
+      expect(options?.externalResources).toEqual(template === 'static' ? [] : [TAILWIND_CDN]);
     },
   );
 });

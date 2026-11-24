@@ -9,3 +9,5 @@ To share, open Chat options, choose Share, and create a shared link. Shared conv
 The Hermes workspace entry sits below the main sidebar icons. Opening it expands the sidebar and replaces the chat list with Hermes's section links, profile selector, refresh action and publication controls. The pane uses LibreChat's sidebar theme. The iframe fills the main content area without a LibreChat header or toolbar above it.
 
 Artifacts can be edited and downloaded from the panel. HTML, React, SVG, Markdown and Mermaid content emitted in LibreChat's artifact format are supported. Arbitrary files saved only in the Hermes filesystem are not automatically imported as LibreChat attachments or published by sharing a chat.
+
+Static HTML previews retain their authored CSS without an automatically injected Tailwind reset. If an HTML artifact needs a CSS library, its document must explicitly load that library or include the required styles. React previews retain Tailwind support. For shadcn/ui designs, ask Hermes to generate a React artifact using the supported components rather than only returning HTML with framework class names.

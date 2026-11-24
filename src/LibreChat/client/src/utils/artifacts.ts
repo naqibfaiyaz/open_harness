@@ -337,15 +337,19 @@ export function buildSandpackOptions(
   template: SandpackProviderProps['template'],
   startupConfig?: SandpackStartupConfig,
 ): SandpackProviderProps['options'] {
+  // Standalone HTML (including document previews) owns its CSS. Injecting
+  // Tailwind afterwards resets authored buttons, headings and form controls.
+  const options =
+    template === 'static' ? { ...sharedOptions, externalResources: [] } : sharedOptions;
   if (!startupConfig) {
-    return sharedOptions;
+    return options;
   }
 
   const bundlerURL =
     template === 'static' ? startupConfig.staticBundlerURL : startupConfig.bundlerURL;
   /** An empty env value (e.g. `${SANDPACK_BUNDLER_URL:-}` in Compose) means unset. */
   return {
-    ...sharedOptions,
+    ...options,
     bundlerURL: bundlerURL || undefined,
   };
 }
