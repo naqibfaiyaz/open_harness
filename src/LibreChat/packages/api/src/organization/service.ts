@@ -109,7 +109,8 @@ export class OrganizationService {
   }
   async members(): Promise<OrganizationMember[]> {
     const rows = await this.call<KeycloakUser[]>(`/users?max=${this.config.maxMembers + 1}`);
-    if (rows.filter((user) => user.email).length > this.config.maxMembers) throw new IdentityError('ORG_MEMBER_LIMIT', 409);
+    if (rows.filter((user) => user.email).length > this.config.maxMembers)
+      throw new IdentityError('ORG_MEMBER_LIMIT', 409);
     return Promise.all(
       rows
         .filter((u) => u.email)
@@ -130,7 +131,12 @@ export class OrganizationService {
     );
     if (old.length) await this.call(path, 'DELETE', old);
   }
-  async create(email: string, password: string, role: OrganizationRole, temporary = true): Promise<string> {
+  async create(
+    email: string,
+    password: string,
+    role: OrganizationRole,
+    temporary = true,
+  ): Promise<string> {
     if ((await this.members()).length >= this.config.maxMembers)
       throw new IdentityError('ORG_MEMBER_LIMIT', 409);
     await this.call('/users', 'POST', {

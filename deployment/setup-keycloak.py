@@ -13,13 +13,14 @@ envfile = root / '.env'
 lines = envfile.read_text().splitlines()
 env = dict(line.split('=', 1) for line in lines if '=' in line and not line.startswith('#'))
 origin = 'https://auth.16-52-156-144.sslip.io'
-for name in ['KEYCLOAK_DB_PASSWORD', 'KEYCLOAK_ADMIN_PASSWORD', 'KEYCLOAK_MANAGEMENT_SECRET', 'OPENID_CLIENT_SECRET']:
+for name in ['KEYCLOAK_DB_PASSWORD', 'KEYCLOAK_ADMIN_PASSWORD', 'KEYCLOAK_MANAGEMENT_SECRET', 'OPENID_CLIENT_SECRET', 'OPENID_SESSION_SECRET']:
     env.setdefault(name, secrets.token_hex(32))
 env.setdefault('KEYCLOAK_ADMIN_USERNAME', 'platform-admin')
 env['KEYCLOAK_ORIGIN'] = origin
 env['OPENID_CLIENT_ID'] = 'librechat'
 env['OPENID_ISSUER'] = origin + '/realms/open-harness'
 env['OPENID_SCOPE'] = 'openid profile email'
+env['OPENID_USE_PKCE'] = 'true'
 env['OPENID_CALLBACK_URL'] = '/oauth/openid/callback'
 env['OPENID_BUTTON_LABEL'] = 'Organization SSO'
 env['ALLOW_SOCIAL_LOGIN'] = 'true'

@@ -91,6 +91,7 @@ export function createUserMethods(
     expectedState?: FilterQuery<IUser>,
     options?: { preserveExpiresAt?: boolean },
   ) => Promise<IUser | null>;
+  linkOrganizationIdentity: (userId: string, subject: string, issuer: string) => Promise<void>;
   awaitAuthUserDocEviction: (userId: string) => Promise<void>;
   consumeBackupCode: (userId: string, codeHash: string) => Promise<boolean>;
   claimSamlIdentity: (
@@ -446,6 +447,16 @@ export function createUserMethods(
    * Update a user with new data without overwriting existing properties.
    * Removes pending-account expiry unless preserveExpiresAt is requested.
    */
+  async function linkOrganizationIdentity(userId: string, subject: string, issuer: string): Promise<void> {
+    const result = await mongoose.models.User.updateOne(
+      { _id: userId, openidId: { $exists: false } },
+      { $set: { provider: 'openid', openidId: subject, openidIssuer: issuer }, $unset: { password: '', expiresAt: '' } },
+      { runValidators: true },
+    );
+    if (result.modifiedCount !== 1) throw new Error('Organization identity link failed');
+    await invalidateAuthUserDocCache(userId);
+  }
+
   async function updateUser(
     userId: string,
     updateData: Partial<IUser>,
@@ -1188,6 +1199,7 @@ export function createUserMethods(
     createUser,
     createUserIfAbsent,
     updateUser,
+    linkOrganizationIdentity,
     awaitAuthUserDocEviction,
     consumeBackupCode,
     claimSamlIdentity,

@@ -83,7 +83,7 @@ const {
   sweepOrphanedPreviews,
   getRoleByName,
   getUserById,
-  updateUser,
+  linkOrganizationIdentity,
   seedDatabase,
   initializeFavorites,
   closeFavorites,
@@ -471,9 +471,7 @@ const startServer = async () => {
     secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
     authenticate: require('./middleware/requireJwtAuth'),
     origin: process.env.DOMAIN_CLIENT,
-    linkIdentity: async (id, subject, issuer) => {
-      await updateUser(id, { openidId: subject, openidIssuer: issuer });
-    },
+    linkIdentity: linkOrganizationIdentity,
   }));
   const hermesIntegration = hermesConfig?.enabled
     ? createHermesIntegration({

@@ -15,6 +15,9 @@ The existing owner opens **Organization** in LibreChat, selects **Connect your
 Keycloak account**, and supplies a new password. The backend links the authenticated
 LibreChat account to the new Keycloak subject and exact issuer. Chats stay attached
 to the original LibreChat account. No arbitrary email account linking is performed.
+The old LibreChat password is removed atomically when the identity is linked, so
+it cannot bypass Keycloak's login security. Existing application sessions expire
+normally and continue to pass live membership checks.
 Once linked, the account uses live Keycloak authorization, including when its old
 LibreChat session is used. Remove the bootstrap ID from host configuration after
 verifying the SSO login if no local recovery enrollment is desired.

@@ -25,6 +25,34 @@ let User: mongoose.Model<t.IUser>;
 let Balance: mongoose.Model<t.IBalance>;
 let methods: ReturnType<typeof createUserMethods>;
 
+it('links a local organization owner atomically and removes the old password', async () => {
+  const user = await User.create({
+    email: 'owner@example.test',
+    provider: 'local',
+    password: 'old-password-hash',
+  });
+  await methods.linkOrganizationIdentity(
+    user._id.toString(),
+    'keycloak-subject',
+    'https://identity.test/realms/org',
+  );
+  const linked = await User.findById(user._id).select('+password').lean();
+  expect(linked).toMatchObject({
+    provider: 'openid',
+    openidId: 'keycloak-subject',
+    openidIssuer: 'https://identity.test/realms/org',
+  });
+  expect(linked?.password).toBeUndefined();
+  await expect(
+    methods.linkOrganizationIdentity(
+      user._id.toString(),
+      'different-subject',
+      'https://identity.test/realms/org',
+    ),
+  ).rejects.toThrow('Organization identity link failed');
+  expect((await User.findById(user._id).lean())?.openidId).toBe('keycloak-subject');
+});
+
 const ORIGINAL_AUTH_USER_CACHE_ENV = {
   AUTH_USER_CACHE_MODE: process.env.AUTH_USER_CACHE_MODE,
 };
