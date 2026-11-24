@@ -24,3 +24,4 @@ services:
       API_SERVER_ENABLED: "true"
     volumes:
       - ../integrations/hermes-titles:/opt/hermes/plugins/open-harness-titles:ro
+      - ../src/LibreChat/client/src/components/Hermes/librechatTheme.json:/opt/data/dashboard-themes/librechat.yaml:ro

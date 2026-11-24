@@ -3,6 +3,7 @@ import { Button } from '@librechat/client';
 import { useSearchParams } from 'react-router-dom';
 import { hermesSections } from 'librechat-data-provider';
 import { useHermesSession, useHermesStatus } from './queries';
+import { extendHermesTheme } from './theme';
 import { useLocalize } from '~/hooks';
 
 /** Stock Hermes controls, embedded behind LibreChat's auth gate; no second agent definition store. */
@@ -18,10 +19,12 @@ export default function HermesWorkspace() {
   const [frameLoaded, setFrameLoaded] = useState(false);
   const [frameError, setFrameError] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
+  const removeTheme = useRef<(() => void) | undefined>();
   const [attempt, setAttempt] = useState(0);
   const mounted = useRef(true);
   const renew = useRef(session.mutateAsync);
   renew.current = session.mutateAsync;
+  useEffect(() => () => removeTheme.current?.(), []);
 
   useEffect(() => {
     if (!status.data?.canManage) return;
@@ -128,10 +131,16 @@ export default function HermesWorkspace() {
             referrerPolicy="same-origin"
             onError={() => setFrameError(true)}
             onLoad={() => {
+              removeTheme.current?.();
+              removeTheme.current = undefined;
               try {
                 if (frame.current?.contentDocument?.contentType.includes('json'))
                   setFrameError(true);
-                else setFrameLoaded(true);
+                else {
+                  const content = frame.current?.contentDocument;
+                  if (content) removeTheme.current = extendHermesTheme(content, document);
+                  setFrameLoaded(true);
+                }
               } catch {
                 setFrameError(true);
               }

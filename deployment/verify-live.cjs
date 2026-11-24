@@ -21,6 +21,8 @@ async function check() {
   const page = await fetch(`${url}/hermes-workspace/profiles?profile=default`, { headers: { Cookie: cookie } });
   if (!page.ok || !page.headers.get('content-type')?.includes('text/html')) throw new Error('Hermes management page did not load');
   if (!(await page.text()).includes('__HERMES_BASE_PATH__')) throw new Error('Hermes dashboard bootstrap missing');
+  const themes = await fetch(`${url}/hermes-workspace/api/dashboard/themes`, { headers: { Cookie: cookie } }).then((r) => r.json());
+  if (!themes.themes?.some((theme) => theme.name === 'librechat' && theme.definition?.customCSS?.includes('--lc-hermes-canvas'))) throw new Error('LibreChat Hermes theme is not available');
   const profiles = await fetch(`${url}/api/hermes/profiles`, { headers }).then((r) => r.json());
   if (!profiles.profiles?.some((p) => p.name === 'default')) throw new Error('Hermes profile catalog unavailable');
   const models = await fetch(`${url}/api/hermes/runtime/v1/models`, {

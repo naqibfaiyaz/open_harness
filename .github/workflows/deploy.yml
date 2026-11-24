@@ -45,7 +45,7 @@ jobs:
           node src/LibreChat/node_modules/typescript/bin/tsc --noEmit -p src/LibreChat/packages/api/tsconfig.json
           node src/LibreChat/node_modules/typescript/bin/tsc --noEmit -p src/LibreChat/client/tsconfig.json
           cd src/LibreChat/client
-          node ../node_modules/jest/bin/jest.js --config jest.config.cjs --runInBand src/components/Hermes/HermesWorkspace.spec.tsx src/components/UnifiedSidebar/__tests__/ExpandedPanel.spec.tsx src/components/Share/ShareView.spec.tsx src/components/Share/ShareView.highlight.spec.tsx src/utils/__tests__/artifacts.test.ts src/lib/rum/privacy.spec.ts --coverage=false
+          node ../node_modules/jest/bin/jest.js --config jest.config.cjs --runInBand src/components/Hermes/HermesWorkspace.spec.tsx src/components/Hermes/theme.spec.ts src/components/UnifiedSidebar/__tests__/ExpandedPanel.spec.tsx src/components/Share/ShareView.spec.tsx src/components/Share/ShareView.highlight.spec.tsx src/utils/__tests__/artifacts.test.ts src/lib/rum/privacy.spec.ts --coverage=false
       - name: Validate rollout scripts
         run: |
           bash -n deployment/deploy-release.sh
