@@ -1,0 +1,171 @@
+{
+  "version": "1.3.19",
+  "cache": true,
+  "interface": {
+    "modelSelect": true,
+    "parameters": true,
+    "presets": true,
+    "bookmarks": true,
+    "multiConvo": true,
+    "prompts": {
+      "use": true,
+      "create": true,
+      "share": true,
+      "public": false
+    },
+    "agents": {
+      "use": true,
+      "create": true,
+      "share": true,
+      "public": false
+    },
+    "skills": {
+      "use": true,
+      "create": true,
+      "share": true,
+      "public": false
+    },
+    "remoteAgents": {
+      "use": true,
+      "create": true,
+      "share": true,
+      "public": false
+    },
+    "mcpServers": {
+      "use": true,
+      "create": true,
+      "share": true,
+      "public": false
+    },
+    "marketplace": {
+      "use": true
+    },
+    "fileSearch": true,
+    "fileCitations": true,
+    "webSearch": true,
+    "runCode": false,
+    "contextUsage": true,
+    "contextCost": true,
+    "artifactUndocking": true,
+    "feedback": true,
+    "schedules": {
+      "use": true,
+      "create": true,
+      "maxPerUser": 10,
+      "minIntervalMinutes": 60,
+      "autoDisableAfterFailures": 5
+    }
+  },
+  "endpoints": {
+    "agents": {
+      "disableBuilder": false,
+      "recursionLimit": 25,
+      "maxRecursionLimit": 50,
+      "capabilities": [
+        "deferred_tools",
+        "file_search",
+        "web_search",
+        "artifacts",
+        "subagents",
+        "actions",
+        "context",
+        "skills",
+        "memory",
+        "ask_user_question",
+        "tools",
+        "ocr",
+        "run_in_background",
+        "tool_intents"
+      ]
+    },
+    "custom": [
+      {
+        "name": "Hermes",
+        "apiKey": "${HERMES_API_KEY}",
+        "baseURL": "http://hermes:8642/v1",
+        "models": {
+          "default": [
+            "hermes-agent"
+          ],
+          "fetch": true
+        },
+        "titleConvo": false,
+        "summarize": false,
+        "modelDisplayLabel": "Hermes"
+      },
+      {
+        "name": "OpenRouter",
+        "apiKey": "${OPENROUTER_API_KEY}",
+        "baseURL": "https://openrouter.ai/api/v1",
+        "models": {
+          "default": [
+            "anthropic/claude-opus-4.6"
+          ],
+          "fetch": true
+        },
+        "titleConvo": true,
+        "titleModel": "anthropic/claude-opus-4.6",
+        "modelDisplayLabel": "OpenRouter"
+      }
+    ]
+  },
+  "memory": {
+    "disabled": false,
+    "personalize": true,
+    "tokenLimit": 3000,
+    "maxInputTokens": 8000,
+    "agent": {
+      "enabled": true,
+      "provider": "OpenRouter",
+      "model": "anthropic/claude-opus-4.6"
+    }
+  },
+  "webSearch": {
+    "searchProvider": "keenable",
+    "scraperProvider": "keenable",
+    "rerankerType": "none"
+  },
+  "mcpServers": {
+    "workspace": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "--yes",
+        "@modelcontextprotocol/server-filesystem@2.4.0",
+        "/app/agent-workspace"
+      ],
+      "timeout": 60000
+    },
+    "knowledge-memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "--yes",
+        "@modelcontextprotocol/server-memory@2.2.1"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "/app/agent-workspace/mcp-memory.jsonl"
+      },
+      "timeout": 60000
+    }
+  },
+  "modelSpecs": {
+    "enforce": false,
+    "prioritize": false,
+    "list": [
+      {
+        "name": "hermes-default",
+        "label": "Hermes",
+        "showInMenu": false,
+        "preset": {
+          "endpoint": "Hermes",
+          "model": "hermes-agent"
+        }
+      }
+    ],
+    "addedEndpoints": [
+      "Hermes",
+      "agents"
+    ]
+  }
+}

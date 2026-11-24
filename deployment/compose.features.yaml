@@ -1,0 +1,107 @@
+{
+  "services": {
+    "librechat": {
+      "volumes": [
+        "agent_workspace:/app/agent-workspace",
+        "mcp_cache:/home/node/.npm"
+      ],
+      "depends_on": {
+        "rag_api": {
+          "condition": "service_started"
+        },
+        "redis": {
+          "condition": "service_started"
+        },
+        "meilisearch": {
+          "condition": "service_started"
+        }
+      }
+    },
+    "vectordb": {
+      "image": "pgvector/pgvector:0.8.0-pg15-trixie",
+      "restart": "unless-stopped",
+      "environment": {
+        "POSTGRES_DB": "${POSTGRES_DB}",
+        "POSTGRES_USER": "${POSTGRES_USER}",
+        "POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}"
+      },
+      "volumes": [
+        "pgvector_data:/var/lib/postgresql/data"
+      ],
+      "networks": [
+        "data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "pg_isready -U librechat -d librechat_rag"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12
+      }
+    },
+    "rag_api": {
+      "image": "registry.librechat.ai/librechat-ai/librechat-rag-api-dev-lite@sha256:4a9ddf164da1858cb06d6cf796b050f680ac6d96b5f0c49cd7a13b8b61140939",
+      "restart": "unless-stopped",
+      "depends_on": {
+        "vectordb": {
+          "condition": "service_healthy"
+        }
+      },
+      "networks": [
+        "app",
+        "data"
+      ],
+      "environment": {
+        "JWT_SECRET": "${JWT_SECRET}",
+        "RAG_OPENAI_BASEURL": "${RAG_OPENAI_BASEURL}",
+        "RAG_OPENAI_API_KEY": "${RAG_OPENAI_API_KEY}",
+        "EMBEDDINGS_PROVIDER": "${EMBEDDINGS_PROVIDER}",
+        "EMBEDDINGS_MODEL": "${EMBEDDINGS_MODEL}",
+        "POSTGRES_DB": "${POSTGRES_DB}",
+        "POSTGRES_USER": "${POSTGRES_USER}",
+        "POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}",
+        "DB_HOST": "${DB_HOST}",
+        "DB_PORT": "${DB_PORT}",
+        "RAG_PORT": "${RAG_PORT}"
+      }
+    },
+    "redis": {
+      "image": "redis:7.4-alpine",
+      "restart": "unless-stopped",
+      "command": [
+        "redis-server",
+        "--appendonly",
+        "yes"
+      ],
+      "volumes": [
+        "redis_data:/data"
+      ],
+      "networks": [
+        "data"
+      ]
+    },
+    "meilisearch": {
+      "image": "getmeili/meilisearch:v1.35.1",
+      "restart": "unless-stopped",
+      "environment": {
+        "MEILI_MASTER_KEY": "${MEILI_MASTER_KEY}",
+        "MEILI_NO_ANALYTICS": "true"
+      },
+      "volumes": [
+        "meili_data:/meili_data"
+      ],
+      "networks": [
+        "data"
+      ]
+    }
+  },
+  "volumes": {
+    "agent_workspace": {},
+    "mcp_cache": {},
+    "pgvector_data": {},
+    "redis_data": {},
+    "meili_data": {}
+  }
+}

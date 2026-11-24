@@ -1,0 +1,72 @@
+Pilot feature rollout
+
+Public sites:
+https://chat.16-52-156-144.sslip.io
+https://hermes.16-52-156-144.sslip.io
+
+LibreChat enabled:
+- Native agent builder and direct OpenRouter endpoint/model catalog
+- Existing Hermes endpoint
+- Prompts, presets, bookmarks, multi-conversation, projects, artifacts
+- Skills and remote-agent management
+- Native memory/personalization and automatic memory agent
+- RAG/file search/citations using private pgvector and authenticated RAG API
+- Embeddings through OpenRouter openai/text-embedding-3-small
+- Conversation search through private Meilisearch
+- Redis-backed resumable streams and scheduled-chat support
+- Native web search configured with keyless Keenable search/scraping; no reranker
+- MCP management and two pinned MCP servers: shared pilot filesystem and knowledge memory
+- Agent background-run and tool-intent capabilities
+- Authenticated sharing controls; public agent/skill/MCP publication remains off
+
+Hermes enabled:
+- Explicit OpenRouter provider and existing Claude model
+- Web tools, browser automation, terminal/processes, files, Python code execution
+- Skills, memory, session search, task planning, delegation, connections, cron tools
+- Kanban, clarification tools, and video-analysis capability
+- OpenRouter image-generation provider is configured and resolves its credential
+
+Verified:
+- Authenticated LibreChat endpoints list agents, Hermes, and OpenRouter
+- Direct OpenRouter inference returned DIRECT_OK
+- RAG ingested a test document and retrieved the correct verification phrase
+- Test document was deleted afterward
+- MCP initialized 25 tools across both servers; filesystem tool invocation passed
+- Hermes used terminal execution to compute 42 and browser automation to retrieve
+  the title Example Domain
+- Scheduling engine and service readiness checks passed
+- Image provider credential availability passed; no billed image was generated as a test
+
+Not operational / intentionally deferred:
+- LibreChat native Code Interpreter, stateful code sessions, and programmatic code tools:
+  separate sandbox deployment not approved; Hermes execution remains available
+- Speech recognition and speech synthesis: optional faster-whisper / edge-tts packages
+  are not in the pinned Hermes image. Speech tools are left disabled rather than
+  showing a tool that fails. Needs a supported image rebuild with those extras.
+- Video generation and X search: provider/account configuration still required
+- Desktop computer control: needs a supported desktop runtime, absent on this server
+- Advanced context-engine/A2A integrations: need a selected engine or peer configuration
+- OAuth integrations, messaging channels, enterprise SSO, external tracing: need their
+  own credentials and destinations; no external accounts were connected automatically
+- Video analysis requires a model that supports the chosen media inputs
+- Browser/mobile microphone permissions and notification permissions remain user-controlled
+
+Operator notes:
+The filesystem and knowledge-memory MCP servers are shared pilot resources, not
+per-user private stores. Native LibreChat memory and RAG retain application ownership rules.
+RAG embeddings and model calls use OpenRouter and are not guaranteed to execute in Canada.
+Artifacts use LibreChat's default external preview infrastructure unless separately self-hosted.
+The current OpenRouter credential is copied server-side into LibreChat's private .env.
+If rotated in Hermes, synchronize it to LibreChat; rerunning the whole feature script also
+regenerates configuration, so preserve later manual edits first.
+The new services use the existing EC2 server. No additional EC2 instance was created.
+Additional model, embedding, image, memory-agent, and scheduled-run usage is metered.
+Private configuration backups are in /opt/librechat-hermes/backups.
+Generated credentials are not included in the source folder.
+
+Deployment:
+bootstrap.sh -> enable-public-https.sh -> enable-features.sh
+compose.features.yaml is included through COMPOSE_FILE in the server .env.
+The scripts target Linux EC2; the D: source folder is a copy for development.
+
+Hermes model catalog: 379 compatible text/tool models were imported from OpenRouter. LibreChat fetches Hermes /v1/models. Run sync-hermes-models.sh on EC2 to refresh the catalog after enable-features.sh. New model availability is not guaranteed by catalog membership; provider funding, model permissions, modality, and capacity still apply.
