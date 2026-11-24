@@ -10,6 +10,7 @@ const { createHermesIntegration, createHermesBodyCapture, createHermesRequestSan
 const { WorkspaceSessions } = requireLC('./packages/api/src/hermes/sessions.ts');
 const { HermesDashboard } = requireLC('./packages/api/src/hermes/dashboard.ts');
 const { hermesTransportParams } = requireLC('./packages/api/src/hermes/transport.ts');
+const { HermesProgress, observeHermesProgress } = requireLC('./packages/api/src/hermes/progress.ts');
 const express = requireLC('express');
 const { WebSocketServer, WebSocket } = requireLC('ws');
 const secrets = { dashboardUsername: 'test-operator', dashboardPassword: 'fixture-password',
@@ -24,6 +25,7 @@ const envWrites: Record<string, unknown>[] = [];
 const titlePrompts: string[] = [];
 let expiredRedirects = 0;
 let cancelledStream: (() => void) | undefined;
+let finishProgress: (() => void) | undefined;
 upstream.post('/auth/password-login', (req: any, res: any) => {
   assert.equal(req.headers['x-forwarded-prefix'], '/hermes-workspace');
   assert.equal(req.body.password, secrets.dashboardPassword);
@@ -79,6 +81,14 @@ upstream.use((req: any, res: any, next: any) => {
       session: req.headers['x-hermes-session-key'], body: req.body });
     if (req.body.stream) {
       res.type('text/event-stream');
+      if (req.body.messages[0]?.content === 'progress') {
+        res.write('event: hermes.tool.progress\r\ndata: {"tool":"terminal","toolCallId":"call-1","status":"running","label":"secret arguments"}\r\n\r\n');
+        finishProgress = () => {
+          res.write('event: hermes.tool.progress\ndata: {"tool":"terminal","toolCallId":"call-1","status":"completed"}\n\n');
+          res.end('data: {"choices":[{"delta":{"content":"through Hermes"}}]}\n\ndata: [DONE]\n\n');
+        };
+        return;
+      }
       res.write('data: {"choices":[{"delta":{"content":"through "}}]}\n\n');
       if (req.body.messages[0]?.content === 'hold') {
         res.once('close', () => cancelledStream?.());
@@ -359,4 +369,59 @@ test('title model failures fall back without failing chat or invoking agent tool
   assert.equal(response.status, 200);
   assert.equal((await response.json()).choices[0].message.content, 'Fail title model');
   assert.equal(runs.length, count);
+});
+
+test('Hermes progress is live, response scoped and private to the requesting user', async () => {
+  const response = await chat('Agent: default', { stream: true, messages: [{ role: 'user', content: 'progress' }] }, { 'X-LibreChat-Response-Id': 'response-progress' });
+  const path = `${origin}/api/hermes/progress/conversation-a/response-progress`;
+  const read = () => fetch(path, { headers: { Authorization: 'Bearer user-token' } }).then((r) => r.json());
+  const running = await read();
+  assert.equal(running.active, true);
+  assert.deepEqual(running.tools, [{ id: 'call-1', tool: 'terminal', status: 'running' }]);
+  assert.equal(JSON.stringify(running).includes('secret'), false);
+  assert.equal((await fetch(path)).status, 401);
+  assert.equal(await fetch(path, { headers: bearer }).then((r) => r.json()), null);
+  assert.equal(await fetch(`${origin}/api/hermes/progress/conversation-b/response-progress`, { headers: { Authorization: 'Bearer user-token' } }).then((r) => r.json()), null);
+  finishProgress?.();
+  const text = await response.text();
+  assert.match(text, /through Hermes/);
+  assert.match(text, /hermes.tool.progress/);
+  const complete = await read();
+  assert.equal(complete.active, false);
+  assert.equal(complete.tools[0].status, 'completed');
+});
+
+test('progress parser preserves bytes across fragmented UTF-8, multiline metadata and malformed events', async () => {
+  const events: unknown[] = [];
+  let ended = false;
+  const text = 'event: hermes.tool.progress\r\ndata: {"tool":"terminal",\r\ndata: "status":"running","label":"café"}\r\n\r\nevent: hermes.tool.progress\ndata: invalid\n\ndata: [DONE]\n\n';
+  const bytes = new TextEncoder().encode(text);
+  const source = new ReadableStream({ start(controller) { for (const byte of bytes) controller.enqueue(Uint8Array.of(byte)); controller.close(); } });
+  const output = await new Response(source.pipeThrough(observeHermesProgress((e: unknown) => events.push(e), () => { ended = true; }))).text();
+  assert.equal(output, text);
+  assert.equal(events.length, 1);
+  assert.equal(ended, true);
+});
+
+test('ordinary turns correlate progress by user message when no edited response ID is present', async () => {
+  const response = await chat('Agent: default', { stream: true }, { 'X-LibreChat-Message-Id': 'ordinary-user-message' });
+  await response.text();
+  const state = await fetch(`${origin}/api/hermes/progress/conversation-a/ordinary-user-message`, { headers: { Authorization: 'Bearer user-token' } }).then((r) => r.json());
+  assert.equal(state.active, false);
+  assert.deepEqual(state.tools, []);
+});
+
+test('progress retries, cancellations and bounded retention cannot contaminate another run', () => {
+  const state = new HermesProgress({ maxRuns: 1, maxTools: 1, retentionMs: 1000 });
+  const old = state.begin('user', 'chat', 'turn');
+  const current = state.begin('user', 'chat', 'turn');
+  old.event({ tool: 'bad', toolCallId: 'old', status: 'running' }); old.finish();
+  current.event({ tool: 'terminal', toolCallId: 'one', status: 'completed' });
+  current.event({ tool: 'terminal', toolCallId: 'one', status: 'running' });
+  current.event({ tool: 'terminal', toolCallId: 'two', status: 'running' });
+  assert.deepEqual(state.get('user', 'chat', 'turn').tools, [{ id: 'one', tool: 'terminal', status: 'completed' }]);
+  const next = state.begin('user', 'chat', 'next');
+  assert.equal(state.get('user', 'chat', 'turn'), null);
+  next.event({ tool: 'terminal', toolCallId: 'two', status: 'running' }); next.finish();
+  assert.equal(state.get('user', 'chat', 'next').tools[0].status, 'interrupted');
 });

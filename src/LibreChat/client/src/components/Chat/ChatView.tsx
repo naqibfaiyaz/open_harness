@@ -25,6 +25,7 @@ import ConversationStarters from './Input/ConversationStarters';
 import ProjectBadge from '~/components/Projects/ProjectBadge';
 import { OwnerTextProvider } from './Messages/PrivateText';
 import { TargetContext } from '~/Providers/TargetContext';
+import HermesProgress from '~/components/Hermes/Progress';
 import useTarget from '~/hooks/Chat/target';
 import { useAddedResponse } from '~/hooks';
 import Presentation from './Presentation';
@@ -195,6 +196,18 @@ function ChatViewPane({
                             renderComposer={({ isLanding, footerBelow, project, placeholder }) => (
                               /* Typing a first message is the cue that the list is next. */
                               <div className="contents" onFocusCapture={warmMessages}>
+                                {String(chat.conversation?.endpoint) === 'Hermes' && (
+                                  <HermesProgress
+                                    conversation={
+                                      chat.conversation?.conversationId ?? conversationId
+                                    }
+                                    turn={
+                                      rootSubmission?.userMessage.responseMessageId ??
+                                      rootSubmission?.userMessage.messageId
+                                    }
+                                    active={chat.isSubmitting}
+                                  />
+                                )}
                                 <ChatForm
                                   index={index}
                                   routePending={routePending}

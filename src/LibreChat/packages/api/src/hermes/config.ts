@@ -6,6 +6,9 @@ export interface HermesConfig {
   runtimeURL: string;
   allowedUserIds: string[];
   endpointName: string;
+  progressMaxRuns?: number;
+  progressMaxTools?: number;
+  progressRetentionMs?: number;
 }
 
 export interface HermesSecrets {

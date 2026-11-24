@@ -572,6 +572,15 @@ describe('resolveHeaders', () => {
     expect(result['X-Msg']).toBe('${TEST_API_KEY}');
   });
 
+  it('resolves the response identifier for authenticated Hermes progress correlation', () => {
+    expect(
+      resolveHeaders({
+        headers: { 'X-Response': '{{LIBRECHAT_BODY_RESPONSEMESSAGEID}}' },
+        body: { responseMessageId: 'response-123_' },
+      })['X-Response'],
+    ).toBe('response-123_');
+  });
+
   it('should not resolve env vars introduced via LIBRECHAT_USER placeholders', () => {
     const user = createTestUser({ name: '${TEST_API_KEY}' });
     const headers = { 'X-Name': '{{LIBRECHAT_USER_NAME}}' };

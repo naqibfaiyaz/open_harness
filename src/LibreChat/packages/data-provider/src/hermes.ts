@@ -9,6 +9,11 @@ export interface HermesStatus {
 export interface HermesProfiles {
   profiles: { name: string; description?: string }[];
 }
+export interface HermesProgressSnapshot {
+  id: string;
+  active: boolean;
+  tools: { id: string; tool: string; status: 'running' | 'completed' | 'interrupted' }[];
+}
 export interface HermesWorkspaceSession {
   workspacePath: string;
   renewAfterMs: number;

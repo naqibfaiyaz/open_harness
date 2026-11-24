@@ -17,6 +17,7 @@ import { HermesDashboard } from './dashboard';
 export { createHermesBodyCapture, createHermesRequestSanitizer } from './body';
 import { HermesRuntime } from './runtime';
 import { generatePromptTitle, HERMES_TITLE_MODEL } from './titles';
+import { HermesProgress, observeHermesProgress } from './progress';
 
 interface Dependencies {
   config: HermesConfig;
@@ -63,6 +64,11 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
   const dashboard = new HermesDashboard(config, secrets, deps.fetch);
   const runtime = new HermesRuntime(config, secrets, dashboard, deps.fetch);
   const sessions = new WorkspaceSessions();
+  const progress = new HermesProgress({
+    maxRuns: config.progressMaxRuns ?? 128,
+    maxTools: config.progressMaxTools ?? 100,
+    retentionMs: config.progressRetentionMs ?? 1800000,
+  });
   const api = Router();
   const workspace = Router();
   const executor = Router();
@@ -76,6 +82,16 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     };
 
   api.use(authenticate);
+  api.get('/progress/:conversation/:turn', (req, res) => {
+    const user = (req as UserRequest).user;
+    const id = user?.id ?? String(user?._id ?? '');
+    if (!id) {
+      error(res, 401, 'HERMES_USER_UNAVAILABLE');
+      return;
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.json(progress.get(id, String(req.params.conversation), String(req.params.turn)));
+  });
   api.get('/status', (req, res) => {
     res.json({
       enabled: config.enabled,
@@ -251,21 +267,46 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
       ]) {
         if (req.body[key] !== undefined) body[key] = req.body[key];
       }
-      const response = await (deps.fetch ?? fetch)(target.url, {
-        method: 'POST',
-        redirect: 'error',
-        signal: abort.signal,
-        headers: {
-          Authorization: `Bearer ${target.key}`,
-          'Content-Type': 'application/json',
-          'X-Hermes-Session-Key': sessionKey(secrets.bridgeKey, user, conversation),
-        },
-        body: JSON.stringify(body),
-      });
+      const turn = req.get('x-librechat-response-id') || req.get('x-librechat-message-id');
+      const activity =
+        body.stream && turn && /^[\w-]{1,257}$/u.test(turn)
+          ? progress.begin(user, conversation, turn)
+          : undefined;
+      const finish = () => activity?.finish();
+      res.once('close', finish);
+      let response: globalThis.Response;
+      try {
+        response = await (deps.fetch ?? fetch)(target.url, {
+          method: 'POST',
+          redirect: 'error',
+          signal: abort.signal,
+          headers: {
+            Authorization: `Bearer ${target.key}`,
+            'Content-Type': 'application/json',
+            'X-Hermes-Session-Key': sessionKey(secrets.bridgeKey, user, conversation),
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (cause) {
+        finish();
+        throw cause;
+      }
       if (!response.ok) {
+        finish();
         await response.body?.cancel();
         return error(res, response.status, 'HERMES_EXECUTION_FAILED');
       }
+      if (
+        activity &&
+        response.body &&
+        response.headers.get('content-type')?.includes('text/event-stream')
+      ) {
+        const observed = response.body.pipeThrough(observeHermesProgress(activity.event, finish));
+        response = new globalThis.Response(observed, {
+          status: response.status,
+          headers: response.headers,
+        });
+      } else finish();
       await sendUpstream(response, res);
     }),
   );

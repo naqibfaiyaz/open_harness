@@ -4796,6 +4796,9 @@ export const configSchema = z.object({
       runtimeURL: z.string().url().default('http://hermes:8642'),
       endpointName: z.string().default('Hermes'),
       allowedUserIds: z.array(z.string()).default([]),
+      progressMaxRuns: z.number().int().min(1).max(10000).default(128),
+      progressMaxTools: z.number().int().min(1).max(1000).default(100),
+      progressRetentionMs: z.number().int().min(1000).max(86400000).default(1800000),
     })
     .optional(),
   persistence: persistenceConfigSchema,
