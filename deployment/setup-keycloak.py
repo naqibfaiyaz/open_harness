@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 import secrets
+import re
 import subprocess
 import sys
 
@@ -75,11 +76,16 @@ envfile.write_text('\n'.join(f'{k}={v}' for k, v in env.items()) + '\n')
 subprocess.run(base + ['up', '-d', 'keycloak-db', 'keycloak'], check=True)
 caddy = root / 'Caddyfile'
 text = caddy.read_text()
+text = re.sub(r'hermes\.16-52-156-144\.sslip\.io\s*\{\s*reverse_proxy hermes:9119\s*\}',
+    'hermes.16-52-156-144.sslip.io {\n    redir https://chat.16-52-156-144.sslip.io/hermes 302\n}', text)
 if 'auth.16-52-156-144.sslip.io' not in text:
     (root / 'keycloak/Caddyfile.before').write_text(text)
     caddy.write_text(text + '\nauth.16-52-156-144.sslip.io {\n'
         '    @private path /admin /admin/* /realms/master /realms/master/*\n'
         '    respond @private 404\n'
         '    reverse_proxy keycloak:8080\n}\n')
+    subprocess.run(base + ['restart', 'caddy'], check=True)
+elif text != caddy.read_text():
+    caddy.write_text(text)
     subprocess.run(base + ['restart', 'caddy'], check=True)
 print('Keycloak services started. Credentials remain in the host environment file.')

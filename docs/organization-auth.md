@@ -34,6 +34,11 @@ Hermes WebSocket admission also recheck membership. Existing streams already adm
 are not force-terminated on a later role change. Existing Owners cannot be demoted
 or disabled through this pilot UI; use the platform operator for ownership recovery.
 
+The old standalone Hermes hostname redirects through LibreChat. Code execution
+still runs inside the organization's shared trusted Hermes environment. These
+management permissions do not provide a filesystem sandbox between members;
+untrusted code workloads require separate restricted execution environments.
+
 ## Members and SSO
 
 Add members with a temporary password of at least 12 characters; members must change
@@ -78,3 +83,7 @@ Use regular PostgreSQL dumps in addition to the existing LibreChat Mongo backups
 Preserve the `.env` file and Keycloak database when redeploying. Restarting an import
 does not overwrite an existing realm. The application release generator enables
 organization auth only when `KEYCLOAK_ORIGIN` exists in the host environment.
+
+`docs/organization-verification.py` is a manual EC2 end-to-end check. It creates
+a disposable identity, completes the OIDC callback, checks User/Admin permissions
+and live revocation, and removes its own test accounts. It prints no credentials.
