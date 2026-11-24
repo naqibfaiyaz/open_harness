@@ -4,13 +4,14 @@ The private executor observes `hermes.tool.progress` SSE events while forwarding
 the original response bytes unchanged. Hermes owns every tool call; these events
 never enter LibreChat's native tool execution loop.
 
-The authenticated `/api/hermes/progress/:conversation/:turn` read endpoint is
-scoped to the signed-in LibreChat user. The server's custom endpoint configuration
-supplies the user, conversation and server-allocated assistant response ID. LibreChat's
-runtime request context exposes that ID as `LIBRECHAT_BODY_MESSAGEID`; the frontend
-follows the corresponding assistant message as its optimistic ID is replaced.
-Replaced runs cannot update the
-current response's activity. No management permission is required to read one's
+The authenticated `/api/hermes/progress/:conversation` read endpoint is
+scoped to the signed-in LibreChat user and the conversation's current foreground
+generation. LibreChat runs one foreground generation per conversation. Starting a
+new run retires the previous presentation lease, and delayed callbacks cannot
+revive it. Completed runs are excluded from this live feed. The query cache also
+keys on LibreChat's submission-start epoch, so a new turn gets fresh state without
+depending on when the assistant's temporary message ID is replaced.
+No management permission is required to read one's
 own activity. Tool arguments, preview labels and results are excluded.
 
 During submission, the composer polls once per second and shows a collapsible

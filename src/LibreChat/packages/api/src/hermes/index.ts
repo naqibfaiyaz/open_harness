@@ -82,6 +82,16 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     };
 
   api.use(authenticate);
+  api.get('/progress/:conversation', (req, res) => {
+    const user = (req as UserRequest).user;
+    const id = user?.id ?? String(user?._id ?? '');
+    if (!id) {
+      error(res, 401, 'HERMES_USER_UNAVAILABLE');
+      return;
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.json(progress.current(id, String(req.params.conversation)));
+  });
   api.get('/progress/:conversation/:turn', (req, res) => {
     const user = (req as UserRequest).user;
     const id = user?.id ?? String(user?._id ?? '');

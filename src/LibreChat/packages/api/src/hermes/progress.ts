@@ -35,8 +35,23 @@ export class HermesProgress {
     return this.runs.get(this.key(user, conversation, turn)) ?? null;
   }
 
+  current(user: string, conversation: string) {
+    this.prune();
+    for (const [key, run] of this.runs) {
+      const [owner, chat] = JSON.parse(key) as string[];
+      if (owner === user && chat === conversation) return run.active ? run : null;
+    }
+    return null;
+  }
+
   begin(user: string, conversation: string, turn: string) {
     this.prune();
+    // LibreChat admits one foreground generation per conversation. Retire its previous
+    // presentation lease immediately; delayed callbacks cannot revive an older run.
+    for (const key of this.runs.keys()) {
+      const [owner, chat] = JSON.parse(key) as string[];
+      if (owner === user && chat === conversation) this.runs.delete(key);
+    }
     const key = this.key(user, conversation, turn);
     const run: ProgressRun = { id: randomUUID(), active: true, updatedAt: Date.now(), tools: [] };
     this.runs.delete(key);

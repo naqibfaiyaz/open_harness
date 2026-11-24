@@ -7,6 +7,7 @@ import { Constants } from 'librechat-data-provider';
 import { ChatScreen, QueuedTurnPortalProvider } from '@librechat/chat/components';
 import {
   submissionByIndex,
+  submissionStartFamily,
   ChatSessionProvider,
   useScrollbarGutterSeed,
   ComposerRestoreProvider,
@@ -18,7 +19,6 @@ import { AddedChatContext, ChatFormProvider, useChatContext, useFileMapContext }
 import { AssistantsMapContext, useAssistantsMapContext } from '~/Providers/AssistantsMapContext';
 import { AgentsMapContext, useAgentsMapContext } from '~/Providers/AgentsMapContext';
 import Footer, { useLandingFooter, useConfiguredFooter } from './Footer';
-import { hermesProgressTurn } from '~/components/Hermes/progressTurn';
 import { useChatSettings } from '~/Providers/ChatSettingsContext';
 import ApprovalProvider from './Messages/Content/ApprovalContext';
 import { preloadMessages, renderMessages } from './Messages/load';
@@ -80,6 +80,7 @@ function ChatViewPane({
   isLoading: boolean;
 }) {
   const rootSubmission = useAtomValue(submissionByIndex(index));
+  const progressGeneration = useAtomValue(submissionStartFamily(index));
   const { saveDrafts } = useChatSettings();
   const enterToSend = useRecoilValue(store.enterToSend);
   const autoSendText = useRecoilValue(store.autoSendText);
@@ -197,15 +198,16 @@ function ChatViewPane({
                             renderComposer={({ isLanding, footerBelow, project, placeholder }) => (
                               /* Typing a first message is the cue that the list is next. */
                               <div className="contents" onFocusCapture={warmMessages}>
-                                {String(chat.conversation?.endpoint) === 'Hermes' && (
-                                  <HermesProgress
-                                    conversation={
-                                      chat.conversation?.conversationId ?? conversationId
-                                    }
-                                    turn={hermesProgressTurn(messages, rootSubmission)}
-                                    active={chat.isSubmitting}
-                                  />
-                                )}
+                                {String(chat.conversation?.endpoint) === 'Hermes' &&
+                                  chat.isSubmitting && (
+                                    <HermesProgress
+                                      conversation={
+                                        chat.conversation?.conversationId ?? conversationId
+                                      }
+                                      generation={progressGeneration ?? undefined}
+                                      active={chat.isSubmitting}
+                                    />
+                                  )}
                                 <ChatForm
                                   index={index}
                                   routePending={routePending}

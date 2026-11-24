@@ -11,16 +11,16 @@ const statusKeys = {
 
 export default function HermesProgress({
   conversation,
-  turn,
+  generation,
   active,
 }: {
   conversation?: string;
-  turn?: string;
+  generation?: number;
   active: boolean;
 }) {
   const localize = useLocalize();
-  const { data } = useHermesProgress(conversation, turn, active);
-  if (!active || !data?.tools.length) return null;
+  const { data } = useHermesProgress(conversation, generation, active);
+  if (!active || !data?.active || !data.tools.length) return null;
   return (
     <details
       open

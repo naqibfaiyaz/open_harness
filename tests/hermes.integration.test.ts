@@ -376,6 +376,12 @@ test('Hermes progress is live, response scoped and private to the requesting use
   const path = `${origin}/api/hermes/progress/conversation-a/response-progress`;
   const read = () => fetch(path, { headers: { Authorization: 'Bearer user-token' } }).then((r) => r.json());
   const running = await read();
+  const currentPath = `${origin}/api/hermes/progress/conversation-a`;
+  const current = await fetch(currentPath, { headers: { Authorization: 'Bearer user-token' } }).then((r) => r.json());
+  assert.equal(current.id, running.id);
+  assert.equal(current.tools[0].status, 'running');
+  assert.equal((await fetch(currentPath)).status, 401);
+  assert.equal(await fetch(currentPath, { headers: bearer }).then((r) => r.json()), null);
   assert.equal(running.active, true);
   assert.deepEqual(running.tools, [{ id: 'call-1', tool: 'terminal', status: 'running' }]);
   assert.equal(JSON.stringify(running).includes('secret'), false);
@@ -387,6 +393,7 @@ test('Hermes progress is live, response scoped and private to the requesting use
   assert.match(text, /through Hermes/);
   assert.match(text, /hermes.tool.progress/);
   const complete = await read();
+  assert.equal(await fetch(currentPath, { headers: { Authorization: 'Bearer user-token' } }).then((r) => r.json()), null);
   assert.equal(complete.active, false);
   assert.equal(complete.tools[0].status, 'completed');
 });
@@ -421,7 +428,11 @@ test('progress retries, cancellations and bounded retention cannot contaminate a
   current.event({ tool: 'terminal', toolCallId: 'two', status: 'running' });
   assert.deepEqual(state.get('user', 'chat', 'turn').tools, [{ id: 'one', tool: 'terminal', status: 'completed' }]);
   const next = state.begin('user', 'chat', 'next');
+  current.event({ tool: 'old', toolCallId: 'late', status: 'running' });
+  current.finish();
+  assert.equal(state.current('user', 'chat').active, true);
   assert.equal(state.get('user', 'chat', 'turn'), null);
   next.event({ tool: 'terminal', toolCallId: 'two', status: 'running' }); next.finish();
   assert.equal(state.get('user', 'chat', 'next').tools[0].status, 'interrupted');
+  assert.equal(state.current('user', 'chat'), null);
 });

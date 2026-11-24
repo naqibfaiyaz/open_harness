@@ -31,22 +31,22 @@ async function call<T>(
 
 export function useHermesProgress(
   conversation: string | undefined,
-  turn: string | undefined,
+  generation: number | undefined,
   enabled: boolean,
 ) {
   const { token, user } = useAuthContext();
   return useQuery<HermesProgressSnapshot | null>(
-    ['hermes-progress', user?.id, conversation, turn],
+    ['hermes-progress', user?.id, conversation, generation],
     ({ signal }) =>
-      call(
+      call<HermesProgressSnapshot | null>(
         token,
-        `/progress/${encodeURIComponent(conversation ?? '')}/${encodeURIComponent(turn ?? '')}`,
+        `/progress/${encodeURIComponent(conversation ?? '')}`,
         'GET',
         undefined,
         signal,
       ),
     {
-      enabled: !!enabled && !!token && !!conversation && conversation !== 'new' && !!turn,
+      enabled: !!enabled && !!token && !!conversation && conversation !== 'new',
       refetchInterval: enabled ? 1000 : false,
       refetchOnWindowFocus: false,
       retry: false,
