@@ -47,11 +47,11 @@ rollback() {
 trap rollback ERR
 trap 'rm -f "$DOCKER_CONFIG/config.json"' EXIT
 echo "Preparing release $commit"
-for file in tools/prepare-integration.cjs deployment/verify-live.cjs integrations/hermes-titles/dashboard/manifest.json integrations/hermes-titles/dashboard/api.py src/LibreChat/client/src/components/Hermes/librechatTheme.json; do
+for file in tools/prepare-integration.cjs deployment/verify-live.cjs integrations/hermes-titles/dashboard/manifest.json integrations/hermes-titles/dashboard/api.py integrations/hermes-titles/plugin.yaml integrations/hermes-titles/__init__.py src/LibreChat/client/src/components/Hermes/librechatTheme.json; do
   curl --fail --silent --show-error --retry 3 "https://raw.githubusercontent.com/naqibfaiyaz/open_harness/$commit/$file" -o "$release/$file"
 done
 chmod 755 "$release/integrations/hermes-titles" "$release/integrations/hermes-titles/dashboard"
-chmod 644 "$release/integrations/hermes-titles/dashboard/manifest.json" "$release/integrations/hermes-titles/dashboard/api.py"
+chmod 644 "$release/integrations/hermes-titles/plugin.yaml" "$release/integrations/hermes-titles/__init__.py" "$release/integrations/hermes-titles/dashboard/manifest.json" "$release/integrations/hermes-titles/dashboard/api.py"
 chmod 644 "$release/src/LibreChat/client/src/components/Hermes/librechatTheme.json"
 aws_cli ecr get-login-password --region ca-central-1 | docker login --username AWS --password-stdin "$REGISTRY" >/dev/null
 docker pull "$IMAGE" >/dev/null
@@ -98,6 +98,9 @@ cp "$release/compose.autodeploy.yaml" "$ROOT/compose.autodeploy.yaml"
 cp "$release/librechat.env" "$ROOT/.librechat.env"
 "${current[@]}" config --quiet
 "${current[@]}" up -d --no-deps --no-build --pull never librechat hermes >/dev/null
+# Enable the policy plugin without replacing existing agent/provider configuration.
+"${current[@]}" exec -T hermes hermes plugins enable --no-allow-tool-override open-harness-titles >/dev/null
+"${current[@]}" restart hermes >/dev/null
 ready=0
 for attempt in $(seq 1 80); do
   if curl --fail --silent --max-time 5 http://127.0.0.1:3080/readyz >/dev/null; then ready=1; break; fi

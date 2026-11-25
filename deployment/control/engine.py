@@ -315,6 +315,8 @@ class Engine:
                 self.compose(slug, 'create', timeout=180)
                 self.network(project)
                 self.compose(slug, 'up', '-d', '--no-build', timeout=180)
+                self.compose(slug, 'exec', '-T', 'hermes', 'hermes', 'plugins', 'enable', '--no-allow-tool-override', 'open-harness-titles', timeout=60)
+                self.compose(slug, 'restart', 'hermes', timeout=60)
                 # The tenant ingress network is private; health is checked inside its own container.
                 import time
                 ready = False

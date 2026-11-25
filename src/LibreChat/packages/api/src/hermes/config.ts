@@ -5,6 +5,8 @@ export interface HermesConfig {
   artifactsEnabledByDefault?: boolean;
   interactiveGraphs?: boolean;
   deliverFiles?: boolean;
+  reportingPeriods?: boolean;
+  reportingTimeZone?: string;
   deliveryMaxFiles?: number;
   deliveryMaxBytes?: number;
   publicApi?: OrganizationApiConfig;
@@ -41,6 +43,7 @@ export function canManageHermes(user: HermesUser | undefined, config: HermesConf
 }
 
 export function validateHermesConfig(config: HermesConfig, secrets: HermesSecrets): void {
+  new Intl.DateTimeFormat('en', { timeZone: config.reportingTimeZone ?? 'UTC' });
   for (const value of [config.dashboardURL, config.runtimeURL, config.publicOrigin]) {
     const url = new URL(value);
     if (

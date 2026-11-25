@@ -1,0 +1,7 @@
+name: open-harness-titles
+version: 2.0.0
+description: Trusted LibreChat reporting clock and Odoo reporting-period validation
+provides_hooks:
+  - pre_api_request
+  - pre_tool_call
+  - on_session_end

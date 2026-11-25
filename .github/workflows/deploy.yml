@@ -56,6 +56,7 @@ jobs:
       - name: Validate rollout scripts
         run: |
           python3 -m unittest discover -s tests -p test_hermes_exports.py -v
+          python3 -m unittest discover -s tests -p test_hermes_reporting.py -v
           bash -n deployment/deploy-release.sh
           node --check deployment/verify-live.cjs
           python3 -m py_compile integrations/hermes-titles/dashboard/api.py deployment/control/engine.py deployment/control/server.py deployment/control/install.py deployment/control/signup.py

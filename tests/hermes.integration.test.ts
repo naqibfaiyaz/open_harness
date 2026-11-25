@@ -127,7 +127,7 @@ before(async () => {
   upstreamServer.listen(0, '127.0.0.1'); await once(upstreamServer, 'listening');
   server.listen(0, '127.0.0.1'); await once(server, 'listening');
   origin = `http://127.0.0.1:${(server.address() as any).port}`;
-  config = { enabled: true, managedOnly: true, publicOrigin: origin,
+  config = { enabled: true, managedOnly: true, reportingPeriods: true, reportingTimeZone: 'America/Toronto', publicOrigin: origin,
     dashboardURL: `http://127.0.0.1:${(upstreamServer.address() as any).port}`,
     runtimeURL: `http://127.0.0.1:${(upstreamServer.address() as any).port}`,
     endpointName: 'Hermes', allowedUserIds: ['operator'] };
@@ -435,4 +435,20 @@ test('progress retries, cancellations and bounded retention cannot contaminate a
   next.event({ tool: 'terminal', toolCallId: 'two', status: 'running' }); next.finish();
   assert.equal(state.get('user', 'chat', 'next').tools[0].status, 'interrupted');
   assert.equal(state.current('user', 'chat'), null);
+});
+
+
+test('trusted clock is appended on every inference request and extracts multimodal user text', async () => {
+  const before = Date.now();
+  await (await chat('Agent: default', { messages: [{ role: 'system', content: 'Today is June 2026' },
+    { role: 'user', content: [{ type: 'text', text: 'last month sales' }] }], reportingTimeZone: 'Pacific/Honolulu' })).text();
+  const messages = runs.at(-1)!.body.messages as { role: string; content: string }[];
+  const trusted = messages.at(-1)!;
+  assert.equal(trusted.role, 'system');
+  const marker = trusted.content.match(/OPEN_HARNESS_REPORTING:([A-Za-z0-9_-]+)\.([a-f0-9]{64})/)!;
+  const context = JSON.parse(Buffer.from(marker[1], 'base64url').toString());
+  assert.equal(context.timeZone, 'America/Toronto');
+  assert.equal(context.status, 'resolved');
+  assert.ok(Date.parse(context.asOf) >= before);
+  assert.equal(marker[2], createHmac('sha256', secrets.bridgeKey).update(`reporting-v1:${marker[1]}`).digest('hex'));
 });

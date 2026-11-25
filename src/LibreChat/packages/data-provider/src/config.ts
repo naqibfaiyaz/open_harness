@@ -4787,25 +4787,34 @@ export const DEFAULT_CONFIG_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 export const DEFAULT_CONFIG_CACHE_MAX_ENTRIES = 1000;
 
 export const configSchema = z.object({
-  platform: z.object({
-    signup: z.object({ requestLimit: z.number().int().min(1).max(1000).default(60), windowMs: z.number().int().min(1000).max(3600000).default(600000) }).optional(),
-    enabled: z.boolean().default(false),
-    socketPath: z.string().default('/run/open-harness/control.sock'),
-    bootstrapUserIds: z.array(z.string()).default([]),
-    timeoutMs: z.number().int().min(1000).max(30000).default(10000),
-    requireMfa: z.boolean().default(true),
-  }).optional(),
-  organization: z.object({
-    enabled: z.boolean().default(false),
-    name: z.string().min(1).max(100),
-    realm: z.string().regex(/^[a-z0-9-]+$/),
-    issuer: z.string().url(),
-    adminURL: z.string().url(),
-    clientId: z.string().default('librechat-management'),
-    bootstrapUserIds: z.array(z.string()).default([]),
-    timeoutMs: z.number().int().min(1000).max(30000).default(10000),
-    maxMembers: z.number().int().min(1).max(1000).default(100),
-  }).optional(),
+  platform: z
+    .object({
+      signup: z
+        .object({
+          requestLimit: z.number().int().min(1).max(1000).default(60),
+          windowMs: z.number().int().min(1000).max(3600000).default(600000),
+        })
+        .optional(),
+      enabled: z.boolean().default(false),
+      socketPath: z.string().default('/run/open-harness/control.sock'),
+      bootstrapUserIds: z.array(z.string()).default([]),
+      timeoutMs: z.number().int().min(1000).max(30000).default(10000),
+      requireMfa: z.boolean().default(true),
+    })
+    .optional(),
+  organization: z
+    .object({
+      enabled: z.boolean().default(false),
+      name: z.string().min(1).max(100),
+      realm: z.string().regex(/^[a-z0-9-]+$/),
+      issuer: z.string().url(),
+      adminURL: z.string().url(),
+      clientId: z.string().default('librechat-management'),
+      bootstrapUserIds: z.array(z.string()).default([]),
+      timeoutMs: z.number().int().min(1000).max(30000).default(10000),
+      maxMembers: z.number().int().min(1).max(1000).default(100),
+    })
+    .optional(),
   hermes: z
     .object({
       enabled: z.boolean().default(false),
@@ -4813,6 +4822,18 @@ export const configSchema = z.object({
       artifactsEnabledByDefault: z.boolean().default(false),
       interactiveGraphs: z.boolean().default(false),
       deliverFiles: z.boolean().default(false),
+      reportingPeriods: z.boolean().default(false),
+      reportingTimeZone: z
+        .string()
+        .refine((zone) => {
+          try {
+            new Intl.DateTimeFormat('en', { timeZone: zone });
+            return true;
+          } catch {
+            return false;
+          }
+        }, 'Expected an IANA timezone')
+        .default('UTC'),
       deliveryMaxFiles: z.number().int().min(1).max(20).default(8),
       deliveryMaxBytes: z.number().int().min(1024).max(26214400).default(20971520),
       publicApi: z

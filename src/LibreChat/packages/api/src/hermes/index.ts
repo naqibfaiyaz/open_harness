@@ -13,6 +13,7 @@ import {
 } from './sessions';
 import { attachWorkspaceUpgrades, isSameOrigin, proxyDashboard, sendUpstream } from './proxy';
 import { canManageHermes, validateHermesConfig } from './config';
+import { reportingInstructions } from './reporting';
 import { HermesDashboard } from './dashboard';
 export { createHermesBodyCapture, createHermesRequestSanitizer } from './body';
 import { HermesRuntime } from './runtime';
@@ -292,9 +293,35 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
               },
             ]
           : [];
+      const latestUser = req.body.messages
+        .filter((message: { role?: string }) => message.role === 'user')
+        .at(-1);
+      let userText = '';
+      if (typeof latestUser?.content === 'string') userText = latestUser.content;
+      else if (Array.isArray(latestUser?.content)) {
+        userText = latestUser.content
+          .filter(
+            (part: { type?: string; text?: string }) =>
+              part.type === 'text' && typeof part.text === 'string',
+          )
+          .map((part: { text: string }) => part.text)
+          .join('\n');
+      }
+      const temporal = config.reportingPeriods
+        ? [
+            {
+              role: 'system',
+              content: reportingInstructions(
+                userText,
+                config.reportingTimeZone ?? 'UTC',
+                secrets.bridgeKey,
+              ),
+            },
+          ]
+        : [];
       const body: Record<string, unknown> = {
         model: target.model,
-        messages: [...req.body.messages, ...presentation],
+        messages: [...req.body.messages, ...presentation, ...temporal],
       };
       for (const key of [
         'stream',
