@@ -4,6 +4,7 @@ import { organizationPaths } from 'librechat-data-provider';
 import { useOrganization } from './queries';
 import { useLocalize } from '~/hooks';
 import Fields from './Fields';
+import ApiKeys from './ApiKeys';
 
 export default function Organization() {
   const localize = useLocalize();
@@ -85,6 +86,7 @@ export default function Organization() {
           </form>
         </section>
       )}
+      {manager && <ApiKeys />}
       {manager && (
         <section className="border-border-light space-y-4 rounded-xl border p-4">
           <h2 className="text-lg font-semibold">{localize('com_org_members')}</h2>

@@ -29,6 +29,7 @@ const {
   createOrganizationRouter,
   createPlatformRouter,
   createSignupRouter,
+  createOrganizationKeyIntegration,
   createArtifactGalleryRouter,
   organizationUserLoader,
   createHermesBodyCapture,
@@ -86,6 +87,7 @@ const {
   sweepOrphanedPreviews,
   getRoleByName,
   getArtifactGalleryMessages,
+  organizationApiKeyStore,
   getUserById,
   linkOrganizationIdentity,
   seedDatabase,
@@ -316,7 +318,6 @@ const startServer = async () => {
     await updateInterfacePermissions({
       appConfig,
       getRoleByName,
-  getArtifactGalleryMessages,
       updateAccessPermissions,
       recordAuditEntry,
     });
@@ -496,6 +497,11 @@ const startServer = async () => {
     origin: process.env.DOMAIN_CLIENT,
     linkIdentity: linkOrganizationIdentity,
   }));
+  const loadHermesUser = organizationUserLoader({
+    config: appConfig.config?.organization,
+    secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
+    loadUser: async (id) => (await getUserById(id, 'id role openidId openidIssuer email')) ?? undefined,
+  });
   const hermesIntegration = hermesConfig?.enabled
     ? createHermesIntegration({
         config: hermesConfig,
@@ -507,14 +513,24 @@ const startServer = async () => {
           bridgeKey: process.env.HERMES_BRIDGE_KEY ?? '',
         },
         authenticate: require('./middleware/requireJwtAuth'),
-        loadUser: organizationUserLoader({
-          config: appConfig.config?.organization,
-          secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
-          loadUser: async (id) => (await getUserById(id, 'id role openidId openidIssuer email')) ?? undefined,
-        }),
+        loadUser: loadHermesUser,
       })
     : undefined;
   if (hermesIntegration) {
+    const organizationKeys = createOrganizationKeyIntegration({
+      config: hermesConfig.publicApi,
+      organization: appConfig.config?.organization,
+      secret: process.env.KEYCLOAK_MANAGEMENT_SECRET ?? '',
+      bridgeKey: process.env.HERMES_BRIDGE_KEY ?? '',
+      origin: process.env.DOMAIN_CLIENT,
+      store: organizationApiKeyStore,
+      authenticate: require('./middleware/requireJwtAuth'),
+      loadUser: loadHermesUser,
+      catalog: hermesIntegration.catalog,
+      executor: hermesIntegration.executor,
+    });
+    app.use('/api/organization/api-keys', organizationKeys.management);
+    app.use('/api/agents/v1', organizationKeys.api);
     app.use('/api/hermes/runtime/v1', hermesIntegration.executor);
     app.use('/api/hermes', hermesIntegration.api);
     app.use('/hermes-workspace', hermesIntegration.workspace);

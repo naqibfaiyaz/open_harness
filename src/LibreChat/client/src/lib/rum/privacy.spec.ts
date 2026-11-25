@@ -38,6 +38,9 @@ it('keeps chat and other ordinary application routes recordable', () => {
 
 it('removes organization password and provider configuration bodies at all deployment paths', () => {
   for (const path of [
+    '/api/agents/v1/chat/completions',
+    '/app/api/organization/api-keys',
+    '/app/api/agents/v1/models',
     '/api/signup/verify',
     '/app/api/signup/create',
     '/api/platform/signup-settings',

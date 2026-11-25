@@ -1,4 +1,5 @@
 export enum QueryKeys {
+  organizationApiKeys = 'organizationApiKeys',
   artifactGallery = 'artifactGallery',
   signup = 'signup',
   organization = 'organization',

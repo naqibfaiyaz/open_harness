@@ -1,3 +1,4 @@
+import { createOrganizationApiKeyModel } from './organizationApiKey';
 import {
   createChannelReplyModel,
   createChannelFeedbackEventModel,
@@ -83,6 +84,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   SubagentContent: ReturnType<typeof createSubagentContentModel>;
   Agent: ReturnType<typeof createAgentModel>;
   AgentApiKey: ReturnType<typeof createAgentApiKeyModel>;
+  OrganizationApiKey: ReturnType<typeof createOrganizationApiKeyModel>;
   AgentChannel: ReturnType<typeof createAgentChannelModel>;
   ChannelIdentity: ReturnType<typeof createChannelIdentityModel>;
   ChannelScope: ReturnType<typeof createChannelScopeModel>;
@@ -149,6 +151,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     SubagentContent: createSubagentContentModel(mongoose),
     Agent: createAgentModel(mongoose),
     AgentApiKey: createAgentApiKeyModel(mongoose),
+    OrganizationApiKey: createOrganizationApiKeyModel(mongoose),
     AgentChannel: createAgentChannelModel(mongoose),
     ChannelIdentity: createChannelIdentityModel(mongoose),
     ChannelScope: createChannelScopeModel(mongoose),

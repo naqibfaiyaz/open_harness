@@ -48,6 +48,7 @@ export interface HermesIntegration {
   api: Router;
   workspace: Router;
   executor: Router;
+  catalog: HermesRuntime['catalog'];
   executionGuard: RequestHandler;
   attach(server: Server): () => void;
 }
@@ -340,11 +341,10 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     req.body.endpointType = 'custom';
     // Artifacts format model output; they do not run a second tool loop.
     const requestedArtifacts = req.body?.ephemeralAgent?.artifacts;
+    const defaultArtifacts = config.artifactsEnabledByDefault ? ArtifactModes.SHADCNUI : '';
     const artifacts = Object.values(ArtifactModes).includes(requestedArtifacts)
       ? requestedArtifacts
-      : config.artifactsEnabledByDefault
-        ? ArtifactModes.SHADCNUI
-        : '';
+      : defaultArtifacts;
     req.body.ephemeralAgent = {
       mcp: [],
       web_search: false,
@@ -364,6 +364,7 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     api,
     workspace,
     executor,
+    catalog: () => runtime.catalog(),
     executionGuard,
     attach(server: Server) {
       return attachWorkspaceUpgrades(server, config, dashboard, sessions, deps.loadUser);

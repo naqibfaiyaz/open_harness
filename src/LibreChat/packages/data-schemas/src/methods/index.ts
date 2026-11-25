@@ -1,3 +1,4 @@
+import { createOrganizationApiKeyMethods } from './organizationApiKey';
 import { createPermissionPrincipalMethods, type PermissionPrincipalStorage } from './provisioning';
 export type {
   PermissionPrincipalStorage,
@@ -327,6 +328,7 @@ export type AllMethods = PermissionPrincipalStorage &
   MemoryMethods &
   ToolFavoriteMethods &
   AgentCategoryMethods &
+  ReturnType<typeof createOrganizationApiKeyMethods> &
   AgentApiKeyMethods &
   AgentChannelMethods &
   MCPServerMethods &
@@ -579,6 +581,7 @@ export function createMethods(
     ...(deps.toolFavorites ?? createToolFavoriteMethods(mongoose)),
     ...createAgentCategoryMethods(mongoose),
     ...createAgentApiKeyMethods(mongoose),
+    ...createOrganizationApiKeyMethods(mongoose),
     ...createAgentChannelMethods(mongoose, deps.getChannelStorageConfig),
     ...createMCPServerMethods(mongoose, {
       getSoleOwnedResourceIds: aclEntryMethods.getSoleOwnedResourceIds,

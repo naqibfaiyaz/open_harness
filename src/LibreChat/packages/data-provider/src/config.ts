@@ -4811,6 +4811,20 @@ export const configSchema = z.object({
       enabled: z.boolean().default(false),
       managedOnly: z.boolean().default(true),
       artifactsEnabledByDefault: z.boolean().default(false),
+      publicApi: z
+        .object({
+          enabled: z.boolean().default(false),
+          maxKeys: z.number().int().min(1).max(500).default(100),
+          defaultExpiryDays: z.number().int().min(1).max(365).default(90),
+          maxExpiryDays: z.number().int().min(1).max(365).default(365),
+          requestsPerMinute: z.number().int().min(1).max(10000).default(60),
+          authRequestsPerMinute: z.number().int().min(1).max(10000).default(300),
+          maxConcurrent: z.number().int().min(1).max(100).default(2),
+          maxOrgConcurrent: z.number().int().min(1).max(500).default(4),
+          recheckMs: z.number().int().min(1000).max(60000).default(15000),
+          allowedOrigins: z.array(z.string().url()).default([]),
+        })
+        .optional(),
       publicOrigin: z.string().url(),
       dashboardURL: z.string().url().default('http://hermes:9119'),
       runtimeURL: z.string().url().default('http://hermes:8642'),

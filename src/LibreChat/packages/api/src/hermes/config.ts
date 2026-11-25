@@ -1,7 +1,9 @@
+import type { OrganizationApiConfig } from 'librechat-data-provider';
 export interface HermesConfig {
   enabled: boolean;
   managedOnly: boolean;
   artifactsEnabledByDefault?: boolean;
+  publicApi?: OrganizationApiConfig;
   publicOrigin: string;
   dashboardURL: string;
   runtimeURL: string;

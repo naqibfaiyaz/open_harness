@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { useOrganization } from './queries';
 import Organization from './index';
 
+jest.mock('./ApiKeys', () => () => null);
 jest.mock('./queries', () => ({ useOrganization: jest.fn() }));
 jest.mock('~/hooks', () => ({ useLocalize: () => (key: string) => key }));
 const query = useOrganization as jest.Mock;

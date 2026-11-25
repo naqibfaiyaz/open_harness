@@ -22,6 +22,7 @@ const HEADER_SPAN_ATTRIBUTE = /^http\.(?:request|response)\.header\.(.+)$/i;
 const CREDENTIAL_HEADER = /authorization|cookie|apikey|token|signature/i;
 const BODY_SPAN_ATTRIBUTE = /^http\.(?:request|response)\.body$/i;
 const CREDENTIAL_ROUTES = [
+  /\/api\/agents\/v1(?:\/|$)/i,
   /\/api\/signup(?:\/|$)/i,
   /\/api\/platform(?:\/|$)/i,
   /\/api\/organization(?:\/|$)/i,

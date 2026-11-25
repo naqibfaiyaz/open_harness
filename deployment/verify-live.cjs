@@ -44,7 +44,36 @@ async function check() {
     headers: { Authorization: `Bearer ${process.env.HERMES_BRIDGE_KEY}` },
   }).then((r) => r.json());
   if (!models.data?.some((m) => m.id === 'Agent: default')) throw new Error('Hermes model catalog unavailable');
+  const keyPage = await fetch(`${url}/api/organization/api-keys`, { headers });
+  if (!keyPage.ok || !(await keyPage.json()).enabled) throw new Error('Organization API key management unavailable');
+  const created = await fetch(`${url}/api/organization/api-keys`, {
+    method: 'POST', headers: { ...headers, Origin: publicOrigin, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: `Deployment verification ${Date.now()}`, expiryDays: 1, allowedModels: ['Agent: default'] }),
+  });
+  if (created.status !== 201) throw new Error(`Disposable API key creation failed: HTTP ${created.status}`);
+  const disposable = await created.json();
+  const apiHeaders = { Authorization: `Bearer ${disposable.secret}`, 'Content-Type': 'application/json' };
+  try {
+    const catalog = await fetch(`${url}/api/agents/v1/models`, { headers: apiHeaders });
+    const allowed = await catalog.json();
+    if (!catalog.ok || allowed.data?.length !== 1 || allowed.data[0].id !== 'Agent: default') throw new Error('Organization API model scope failed');
+    const denied = await fetch(`${url}/api/agents/v1/chat/completions`, {
+      method: 'POST', headers: apiHeaders, body: JSON.stringify({ model: 'Agent: forbidden', messages: [] }),
+    });
+    if (denied.status !== 403) throw new Error('Organization API model restriction failed');
+    const completion = await fetch(`${url}/api/agents/v1/chat/completions`, {
+      method: 'POST', headers: apiHeaders, signal: AbortSignal.timeout(120000),
+      body: JSON.stringify({ model: 'Agent: default', messages: [{ role: 'user', content: 'Reply with API_OK only. Do not use tools or access files, memory or external services.' }], stream: false }),
+    });
+    const result = await completion.json();
+    if (!completion.ok || typeof result.choices?.[0]?.message?.content !== 'string' || !result.choices[0].message.content.includes('API_OK')) throw new Error(`Organization API inference failed: HTTP ${completion.status}`);
+  } finally {
+    const revoked = await fetch(`${url}/api/organization/api-keys/${disposable.key.id}`, { method: 'DELETE', headers: { ...headers, Origin: publicOrigin } });
+    if (revoked.status !== 204) throw new Error('Disposable API key cleanup failed');
+  }
+  const revokedAccess = await fetch(`${url}/api/agents/v1/models`, { headers: apiHeaders });
+  if (revokedAccess.status !== 401) throw new Error('Organization API key revocation failed');
   await fetch(`${url}/hermes-workspace/_session`, { method: 'DELETE', headers: { ...headers, Cookie: cookie, Origin: publicOrigin } });
-  console.log(JSON.stringify({ administratorManagement: true, hermesDashboard: true, profileCatalog: true, modelCatalog: true }));
+  console.log(JSON.stringify({ administratorManagement: true, hermesDashboard: true, profileCatalog: true, modelCatalog: true, organizationApiKeys: true, externalInference: true, keyRevocation: true }));
 }
 check().catch((error) => { console.error(error.message); process.exitCode = 1; });
