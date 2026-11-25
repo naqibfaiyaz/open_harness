@@ -307,21 +307,32 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
           .map((part: { text: string }) => part.text)
           .join('\n');
       }
+      const inferenceMessages = [...req.body.messages];
+      if (config.reportingPeriods) {
+        const lastUserIndex = inferenceMessages
+          .map((message: { role?: string }) => message.role)
+          .lastIndexOf('user');
+        inferenceMessages.splice(lastUserIndex, 0, {
+          role: 'assistant',
+          content: reportingInstructions(
+            userText,
+            config.reportingTimeZone ?? 'UTC',
+            secrets.bridgeKey,
+          ),
+        });
+      }
       const temporal = config.reportingPeriods
         ? [
             {
               role: 'system',
-              content: reportingInstructions(
-                userText,
-                config.reportingTimeZone ?? 'UTC',
-                secrets.bridgeKey,
-              ),
+              content:
+                'Use the bridge-signed reporting context immediately before the latest user message as the current request clock and reporting period. It supersedes stale dates in memory and history. Never guess or substitute a reporting month. Preserve the original explicit period for follow-up edits.',
             },
           ]
         : [];
       const body: Record<string, unknown> = {
         model: target.model,
-        messages: [...req.body.messages, ...presentation, ...temporal],
+        messages: [...inferenceMessages, ...presentation, ...temporal],
       };
       for (const key of [
         'stream',

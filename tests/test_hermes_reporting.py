@@ -54,6 +54,13 @@ class ReportingPolicyTests(unittest.TestCase):
         self.capture()
         self.assertIsNone(self.query([]))
 
+    def test_assistant_envelope_and_anthropic_blocks_are_captured(self):
+        payload = base64.urlsafe_b64encode(json.dumps(self.context).encode()).decode().rstrip('=')
+        signature = hmac.new(b'fixture-test-key', ('reporting-v1:' + payload).encode(), hashlib.sha256).hexdigest()
+        text = f'Prior assistant reply. Trusted request clock and reporting context [OPEN_HARNESS_REPORTING:{payload}.{signature}]'
+        policy.capture(system_prompt='static policy', request_messages=[{'role': 'assistant', 'content': [{'type': 'text', 'text': text}]}], session_id='owner', turn_id='turn')
+        self.assertEqual(self.query([])['action'], 'block')
+
     def test_discovery_allowed_but_multiple_period_data_read_blocked(self):
         self.context['status'] = 'clarification_required'
         self.context.pop('period')

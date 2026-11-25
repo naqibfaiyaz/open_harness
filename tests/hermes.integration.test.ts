@@ -81,7 +81,7 @@ upstream.use((req: any, res: any, next: any) => {
       session: req.headers['x-hermes-session-key'], body: req.body });
     if (req.body.stream) {
       res.type('text/event-stream');
-      if (req.body.messages[0]?.content === 'progress') {
+      if (req.body.messages.filter((message: { role?: string }) => message.role === 'user').at(-1)?.content === 'progress') {
         res.write('event: hermes.tool.progress\r\ndata: {"tool":"terminal","toolCallId":"call-1","status":"running","label":"secret arguments"}\r\n\r\n');
         finishProgress = () => {
           res.write('event: hermes.tool.progress\ndata: {"tool":"terminal","toolCallId":"call-1","status":"completed"}\n\n');
@@ -90,7 +90,7 @@ upstream.use((req: any, res: any, next: any) => {
         return;
       }
       res.write('data: {"choices":[{"delta":{"content":"through "}}]}\n\n');
-      if (req.body.messages[0]?.content === 'hold') {
+      if (req.body.messages.filter((message: { role?: string }) => message.role === 'user').at(-1)?.content === 'hold') {
         res.once('close', () => cancelledStream?.());
         return;
       }
@@ -438,17 +438,22 @@ test('progress retries, cancellations and bounded retention cannot contaminate a
 });
 
 
-test('trusted clock is appended on every inference request and extracts multimodal user text', async () => {
+test('trusted clock is supplied on every inference request and extracts multimodal user text', async () => {
   const before = Date.now();
   await (await chat('Agent: default', { messages: [{ role: 'system', content: 'Today is June 2026' },
     { role: 'user', content: [{ type: 'text', text: 'last month sales' }] }], reportingTimeZone: 'Pacific/Honolulu' })).text();
-  const messages = runs.at(-1)!.body.messages as { role: string; content: string }[];
-  const trusted = messages.at(-1)!;
-  assert.equal(trusted.role, 'system');
+  const messages = runs.at(-1)!.body.messages as { role: string; content: any }[];
+  const trusted = messages.findLast((message) => message.role === 'assistant' && message.content.includes('OPEN_HARNESS_REPORTING:'))!;
+  assert.equal(trusted.role, 'assistant');
+  assert.equal(messages.filter((message) => message.role === 'user')[0].content[0].text, 'last month sales');
   const marker = trusted.content.match(/OPEN_HARNESS_REPORTING:([A-Za-z0-9_-]+)\.([a-f0-9]{64})/)!;
   const context = JSON.parse(Buffer.from(marker[1], 'base64url').toString());
   assert.equal(context.timeZone, 'America/Toronto');
   assert.equal(context.status, 'resolved');
   assert.ok(Date.parse(context.asOf) >= before);
+  const systemPrompts = messages.filter((message) => message.role === 'system').map((message) => message.content);
+  await (await chat('Agent: default', { messages: [{ role: 'system', content: 'Today is June 2026' }, { role: 'user', content: [{ type: 'text', text: 'last month sales' }] }] })).text();
+  const nextMessages = runs.at(-1)!.body.messages as { role: string; content: string }[];
+  assert.deepEqual(nextMessages.filter((message) => message.role === 'system').map((message) => message.content), systemPrompts);
   assert.equal(marker[2], createHmac('sha256', secrets.bridgeKey).update(`reporting-v1:${marker[1]}`).digest('hex'));
 });

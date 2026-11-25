@@ -15,9 +15,12 @@ receive instructions to clarify/preserve the report's stated dates, but are not
 deterministically resolved or persisted as a reporting contract in this release.
 
 Each context includes an as-of instant and a bridge signature. The Hermes plugin
-captures it from the provider-bound system prompt and scopes it to the native
+captures it from a signed assistant context envelope immediately before the latest
+user message and scopes it to the native
 session and turn. Unsigned, expired and non-LibreChat contexts do not install a
-policy. No credentials, customer query contents or sales results enter audit logs.
+policy. A static system instruction identifies this trusted context; refreshing
+the clock does not change the system-prompt/first-user conversation fingerprint.
+No credentials, customer query contents or sales results enter audit logs.
 
 The pre-tool guard validates Odoo data reads (including lazy `tool_call` batches)
 for sale.order, sale.order.line, sale.report, account.move and account.move.line.

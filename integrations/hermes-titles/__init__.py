@@ -19,10 +19,23 @@ _FIELDS = {'sale.order': 'date_order', 'sale.order.line': 'order_id.date_order',
            'sale.report': 'date'}
 
 
-def capture(system_prompt='', session_id='', turn_id='', **_):
+def capture(system_prompt='', session_id='', turn_id='', request_messages=None, **_):
     """Only a bridge-signed system context may establish a policy for this turn."""
     key = (session_id, turn_id)
     context = None
+    # The fresh context lives in an assistant envelope before the latest user,
+    # keeping Hermes' system-prompt/first-user session fingerprint stable.
+    envelopes = []
+    for message in request_messages or []:
+        if message.get('role') != 'assistant':
+            continue
+        content = message.get('content', '')
+        if isinstance(content, list):
+            content = '\n'.join(p.get('text', '') for p in content if isinstance(p, dict))
+        if isinstance(content, str) and _MARKER.search(content):
+            envelopes.append(content)
+    if envelopes:
+        system_prompt = envelopes[-1]
     secret = os.environ.get('HERMES_BRIDGE_KEY', '')
     # Anthropic uses content blocks while OpenAI-compatible providers use a string.
     if isinstance(system_prompt, list):
@@ -44,8 +57,9 @@ def capture(system_prompt='', session_id='', turn_id='', **_):
         for old, (_, expiry) in list(_contexts.items()):
             if expiry < time.monotonic():
                 _contexts.pop(old, None)
-        if len(_contexts) < 1024 or key in _contexts:
-            _contexts[key] = (context, time.monotonic() + 86400)
+        if len(_contexts) >= 1024 and key not in _contexts:
+            _contexts.pop(next(iter(_contexts)))
+        _contexts[key] = (context, time.monotonic() + 86400)
 
 
 def _bound(value, timestamp):
