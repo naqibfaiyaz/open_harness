@@ -34,3 +34,23 @@ it('extends existing Hermes styles and follows LibreChat theme changes with clea
   document.documentElement.style.removeProperty('--surface-primary');
   document.documentElement.style.removeProperty('--text-primary');
 });
+
+it('brands the embedded header without changing content or event handlers', async () => {
+  const target = document.implementation.createHTMLDocument('Hermes Agent');
+  target.body.innerHTML =
+    '<header><strong>Hermes Agent</strong><button>Save</button></header><pre>Hermes Agent</pre>';
+  const button = target.querySelector('button');
+  const clicked = jest.fn();
+  button?.addEventListener('click', clicked);
+  const cleanup = extendHermesTheme(target, document, 'Agent workspace');
+  expect(target.querySelector('strong')?.textContent).toBe('Agent workspace');
+  expect(target.querySelector('pre')?.textContent).toBe('Hermes Agent');
+  expect(target.title).toBe('Agent workspace');
+  button?.click();
+  expect(clicked).toHaveBeenCalledTimes(1);
+  target.querySelector('strong')!.textContent = 'Hermes Agent';
+  await waitFor(() => expect(target.querySelector('strong')?.textContent).toBe('Agent workspace'));
+  cleanup();
+  expect(target.querySelector('strong')?.textContent).toBe('Hermes Agent');
+  expect(target.title).toBe('Hermes Agent');
+});

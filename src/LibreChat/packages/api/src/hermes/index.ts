@@ -29,16 +29,16 @@ interface Dependencies {
 type UserRequest = Request & { user?: HermesUser };
 const messages: Record<string, string> = {
   HERMES_PROFILE_OR_MODEL_NOT_READY:
-    'This Hermes agent or model is not ready. Enable it in Hermes workspace and start a new chat.',
+    'This agent or model is not ready. Enable it in Agent workspace and start a new chat.',
   HERMES_EXECUTION_REQUIRED:
-    'Select the Hermes endpoint. Manage agents and tools in Hermes workspace.',
+    'Select the Hermes endpoint. Manage agents and tools in Agent workspace.',
   HERMES_CONFIGURE_TOOLS_IN_WORKSPACE:
-    'Configure tools in Hermes workspace before starting a new chat.',
+    'Configure tools in Agent workspace before starting a new chat.',
   HERMES_SESSION_CONTEXT_REQUIRED:
     'The LibreChat user or conversation context is missing from the server configuration.',
-  HERMES_UNAVAILABLE: 'Hermes is unavailable. Retry after checking its connection.',
+  HERMES_UNAVAILABLE: 'The agent service is unavailable. Retry after checking its connection.',
   HERMES_EXECUTION_FAILED:
-    'Hermes could not complete this request. Check the session in Hermes workspace.',
+    'The agent could not complete this request. Check the session in Agent workspace.',
 };
 const error = (res: Response, status: number, code: string) =>
   res
@@ -342,7 +342,9 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     const requestedArtifacts = req.body?.ephemeralAgent?.artifacts;
     const artifacts = Object.values(ArtifactModes).includes(requestedArtifacts)
       ? requestedArtifacts
-      : config.artifactsEnabledByDefault ? ArtifactModes.SHADCNUI : '';
+      : config.artifactsEnabledByDefault
+        ? ArtifactModes.SHADCNUI
+        : '';
     req.body.ephemeralAgent = {
       mcp: [],
       web_search: false,

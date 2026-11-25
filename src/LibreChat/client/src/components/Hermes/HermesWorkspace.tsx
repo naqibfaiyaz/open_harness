@@ -138,7 +138,12 @@ export default function HermesWorkspace() {
                   setFrameError(true);
                 else {
                   const content = frame.current?.contentDocument;
-                  if (content) removeTheme.current = extendHermesTheme(content, document);
+                  if (content)
+                    removeTheme.current = extendHermesTheme(
+                      content,
+                      document,
+                      localize('com_hermes_workspace'),
+                    );
                   setFrameLoaded(true);
                 }
               } catch {

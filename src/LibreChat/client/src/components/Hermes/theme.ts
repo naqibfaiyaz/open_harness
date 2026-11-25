@@ -1,7 +1,11 @@
 import theme from './librechatTheme.json';
 
 /** Additive theme bridge. Never replaces Hermes markup, stylesheets or event handlers. */
-export function extendHermesTheme(target: Document, host: Document): () => void {
+export function extendHermesTheme(
+  target: Document,
+  host: Document,
+  workspaceLabel?: string,
+): () => void {
   const style = target.createElement('style');
   style.dataset.librechatHermesTheme = '';
   const fonts: string[] = [];
@@ -24,6 +28,28 @@ export function extendHermesTheme(target: Document, host: Document): () => void 
   }
   style.textContent = `${fonts.join('\n')}\n${theme.customCSS}`;
   target.head.append(style);
+  const originalTitle = target.title;
+  const renamed = new Map<Text, string>();
+  const brand = () => {
+    if (!workspaceLabel) return;
+    target.title = workspaceLabel;
+    for (const header of Array.from(target.querySelectorAll('header'))) {
+      const walker = target.createTreeWalker(header, 4);
+      let node = walker.nextNode();
+      while (node) {
+        if (/^\s*Hermes(?: Agent)?\s*$/.test(node.textContent ?? '')) {
+          const text = node as Text;
+          if (!renamed.has(text)) renamed.set(text, text.data);
+          text.data = workspaceLabel;
+        }
+        node = walker.nextNode();
+      }
+    }
+  };
+  brand();
+  const branding = new MutationObserver(brand);
+  if (workspaceLabel)
+    branding.observe(target.body, { childList: true, subtree: true, characterData: true });
   const root = target.documentElement;
   const names: Record<string, string> = {
     canvas: 'surface-primary',
@@ -53,6 +79,11 @@ export function extendHermesTheme(target: Document, host: Document): () => void 
   });
   return () => {
     observer.disconnect();
+    branding.disconnect();
+    for (const [node, original] of renamed) {
+      if (node.data === workspaceLabel) node.data = original;
+    }
+    if (workspaceLabel && target.title === workspaceLabel) target.title = originalTitle;
     style.remove();
     for (const name of [...Object.keys(names), 'font'])
       root.style.removeProperty(`--lc-hermes-${name}`);
