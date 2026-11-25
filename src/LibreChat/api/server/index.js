@@ -28,6 +28,7 @@ const {
   createHermesIntegration,
   createOrganizationRouter,
   createPlatformRouter,
+  createSignupRouter,
   organizationUserLoader,
   createHermesBodyCapture,
   createHermesRequestSanitizer,
@@ -467,6 +468,11 @@ const startServer = async () => {
 
   // Hermes remains the resource and execution owner. Legacy code only wires the TS integration.
   const hermesConfig = appConfig.config?.hermes;
+  app.use('/api/signup', createSignupRouter({
+    config: appConfig.config?.platform,
+    controlSecret: process.env.PLATFORM_CONTROL_KEY ?? '',
+    origin: process.env.DOMAIN_CLIENT,
+  }));
   app.use('/api/platform', createPlatformRouter({
     config: appConfig.config?.platform,
     organization: appConfig.config?.organization,

@@ -1,4 +1,5 @@
 export enum QueryKeys {
+  signup = 'signup',
   organization = 'organization',
   platform = 'platform',
   hermesStatus = 'hermesStatus',

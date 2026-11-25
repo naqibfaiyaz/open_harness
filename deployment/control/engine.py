@@ -103,7 +103,7 @@ class Engine:
             raise ControlError('IDENTITY_OPERATION_FAILED', 503) from None
 
     def tenant(self, slug):
-        if not re.fullmatch(r'[a-z][a-z0-9-]{1,22}[a-z0-9]', slug) or slug in RESERVED:
+        if not isinstance(slug, str) or not re.fullmatch(r'[a-z][a-z0-9-]{1,22}[a-z0-9]', slug) or slug in RESERVED:
             raise ControlError('INVALID_ORGANIZATION', 400)
         target = (ROOT/'tenants'/slug).resolve()
         if target.parent != (ROOT/'tenants').resolve():
@@ -126,9 +126,13 @@ class Engine:
             if db.execute('SELECT 1 FROM organizations WHERE slug=?', (slug,)).fetchone():
                 raise ControlError('ORGANIZATION_EXISTS', 409)
             target.mkdir(mode=0o700)
-            (target/'owner.json').write_text(json.dumps({'password': data['password']}))
+            (target/'owner.json').write_text(json.dumps({'password': data['password'], 'selfService': bool(data.get('signupId'))}))
             db.execute('INSERT INTO organizations VALUES (?,?,?,?,?,?,?,?,?,?)', (slug, data['name'], 'provisioning',
                 'https://'+slug+'.'+self.domain, data['ownerEmail'].strip().lower(), 'org-'+slug, None, now(), now(), 0))
+            if data.get('signupId'):
+                updated = db.execute('UPDATE signups SET slug=? WHERE id=? AND verified=1 AND slug IS NULL', (slug, data['signupId']))
+                if updated.rowcount != 1:
+                    raise ControlError('SIGNUP_ALREADY_CREATED')
         self.audit(data['actor'], 'create', slug, data['reason'], 'queued')
         return self.get(slug)
 
@@ -173,10 +177,12 @@ class Engine:
         if not users:
             if not ownerfile.exists():
                 raise ControlError('OWNER_SETUP_REQUIRED')
+            initial = json.loads(ownerfile.read_text())
+            self_service = initial.get('selfService', False)
             self.kc(path+'/users', 'POST', {'username': row['ownerEmail'], 'email': row['ownerEmail'],
-                'enabled': True, 'emailVerified': False, 'firstName': 'Organization', 'lastName': 'Owner',
-                'requiredActions': ['UPDATE_PASSWORD'], 'credentials': [{'type': 'password',
-                'value': json.loads(ownerfile.read_text())['password'], 'temporary': True}]})
+                'enabled': True, 'emailVerified': self_service, 'firstName': 'Organization', 'lastName': 'Owner',
+                'requiredActions': [] if self_service else ['UPDATE_PASSWORD'], 'credentials': [{'type': 'password',
+                'value': initial['password'], 'temporary': not self_service}]})
             users = self.kc(path+'/users?username='+urllib.parse.quote(row['ownerEmail'])+'&exact=true')
         if ownerfile.exists():
             role = self.kc(path+'/roles/org-owner')

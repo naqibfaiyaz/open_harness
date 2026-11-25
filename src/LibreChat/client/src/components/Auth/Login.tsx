@@ -8,6 +8,7 @@ import { getLoginError, persistRedirectToSession } from '~/utils';
 import { ErrorMessage } from '~/components/Auth/ErrorMessage';
 import SocialButton from '~/components/Auth/SocialButton';
 import { useAuthContext } from '~/hooks/AuthContext';
+import SignupLink from '../Platform/SignupLink';
 import { useLocalize } from '~/hooks';
 import LoginForm from './LoginForm';
 
@@ -113,6 +114,7 @@ function Login() {
 
   return (
     <>
+      <SignupLink />
       {error != null && <ErrorMessage>{localize(getLoginError(error))}</ErrorMessage>}
       {startupConfig?.emailLoginEnabled === true && (
         <LoginForm

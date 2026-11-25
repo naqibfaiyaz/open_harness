@@ -4788,6 +4788,7 @@ export const DEFAULT_CONFIG_CACHE_MAX_ENTRIES = 1000;
 
 export const configSchema = z.object({
   platform: z.object({
+    signup: z.object({ requestLimit: z.number().int().min(1).max(1000).default(60), windowMs: z.number().int().min(1000).max(3600000).default(600000) }).optional(),
     enabled: z.boolean().default(false),
     socketPath: z.string().default('/run/open-harness/control.sock'),
     bootstrapUserIds: z.array(z.string()).default([]),

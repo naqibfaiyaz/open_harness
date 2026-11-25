@@ -123,6 +123,14 @@ export const router = createBrowserRouter(
       ],
     },
     {
+      path: 'signup',
+      lazy: () =>
+        importWithRecovery(() => import('~/components/Platform/Signup')).then((m) => ({
+          Component: m.default,
+        })),
+      errorElement: <RouteErrorBoundary />,
+    },
+    {
       path: 'verify',
       element: <VerifyEmail />,
       errorElement: <RouteErrorBoundary />,
@@ -179,11 +187,17 @@ export const router = createBrowserRouter(
                 },
                 {
                   path: 'organization',
-                  lazy: () => importWithRecovery(() => import('~/components/Organization')).then((m) => ({ Component: m.default })),
+                  lazy: () =>
+                    importWithRecovery(() => import('~/components/Organization')).then((m) => ({
+                      Component: m.default,
+                    })),
                 },
                 {
                   path: 'platform',
-                  lazy: () => importWithRecovery(() => import('~/components/Platform')).then((m) => ({ Component: m.default })),
+                  lazy: () =>
+                    importWithRecovery(() => import('~/components/Platform')).then((m) => ({
+                      Component: m.default,
+                    })),
                 },
                 {
                   path: 'prompts',

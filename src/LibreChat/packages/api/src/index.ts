@@ -186,3 +186,5 @@ export * from './channels/summary';
 export * from './hermes';
 export * from './organization';
 export * from './platform';
+
+export * from './platform/signup';

@@ -87,7 +87,7 @@ config = {'services': {'librechat': {'image': image, 'labels': {'io.open-harness
   'HERMES_DASHBOARD_BASIC_AUTH_PASSWORD': '${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}',
   'HERMES_DASHBOARD_PUBLIC_URL': '${DOMAIN_CLIENT}/hermes-workspace'}}}}
 (release/'compose.autodeploy.yaml').write_text(json.dumps(config, indent=2) + '\n')
-excluded = {'PLATFORM_KEYCLOAK_SECRET','KEYCLOAK_ADMIN_PASSWORD','KEYCLOAK_ADMIN_USERNAME','KEYCLOAK_DB_PASSWORD'}
+excluded = {'SIGNUP_SMTP_PASSWORD','SIGNUP_SMTP_USER','SIGNUP_SMTP_HOST','SIGNUP_EMAIL_FROM','PLATFORM_KEYCLOAK_SECRET','KEYCLOAK_ADMIN_PASSWORD','KEYCLOAK_ADMIN_USERNAME','KEYCLOAK_DB_PASSWORD'}
 (release/'librechat.env').write_text('\n'.join(line for line in lines if line.split('=',1)[0] not in excluded) + '\n')
 PY
 changed=1

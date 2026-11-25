@@ -31,12 +31,26 @@ export function createControlClient(config: PlatformConfig, secret: string): Con
             res.on('error', reject);
             res.on('end', () => {
               if (!res.statusCode || res.statusCode >= 400) {
-                reject(
-                  new IdentityError(
-                    res.statusCode === 409 ? 'PLATFORM_CONFLICT' : 'PLATFORM_REQUEST_FAILED',
-                    res.statusCode ?? 503,
-                  ),
-                );
+                let code = res.statusCode === 409 ? 'PLATFORM_CONFLICT' : 'PLATFORM_REQUEST_FAILED';
+                try {
+                  const payload = JSON.parse(Buffer.concat(chunks).toString()) as { code?: string };
+                  const allowed = [
+                    'SIGNUP_UNAVAILABLE',
+                    'SIGNUP_SESSION_REQUIRED',
+                    'SIGNUP_LINK_INVALID',
+                    'SIGNUP_RATE_LIMIT',
+                    'SIGNUP_EMAIL_UNAVAILABLE',
+                    'ORGANIZATION_CAPACITY',
+                    'ORGANIZATION_EXISTS',
+                    'INVALID_ORGANIZATION',
+                    'INVALID_INPUT',
+                    'QUEUE_FULL',
+                  ];
+                  if (payload.code && allowed.includes(payload.code)) code = payload.code;
+                } catch {
+                  /* Unapproved upstream diagnostics never leave the boundary. */
+                }
+                reject(new IdentityError(code, res.statusCode ?? 503));
                 return;
               }
               try {
@@ -147,6 +161,27 @@ export function createPlatformRouter(deps: {
     '/audit',
     safe(async (_req, res) => res.json(await control!.call('/audit'))),
   );
+  router.get(
+    '/signup-settings',
+    safe(async (_req, res) => res.json(await control!.call('/signup-settings'))),
+  );
+  router.post(
+    '/signup-settings',
+    safe(async (req, res) => {
+      res.json(
+        await control!.call('/signup-settings', 'POST', {
+          enabled: req.body?.enabled,
+          host: req.body?.host,
+          port: req.body?.port,
+          sender: req.body?.sender,
+          username: req.body?.username,
+          password: req.body?.password,
+          actor: actor(req),
+          reason: reason(req),
+        }),
+      );
+    }),
+  );
   const actor = (req: Request & { user?: IdentityUser }) => String(req.user?.id ?? req.user?._id);
   const reason = (req: Request) => {
     if (
@@ -181,18 +216,16 @@ export function createPlatformRouter(deps: {
         password.length > 128
       )
         throw new IdentityError('PLATFORM_INVALID_INPUT', 400);
-      res
-        .status(202)
-        .json(
-          await control!.call('/organizations', 'POST', {
-            slug: name,
-            name: display,
-            ownerEmail,
-            password,
-            actor: actor(req),
-            reason: reason(req),
-          }),
-        );
+      res.status(202).json(
+        await control!.call('/organizations', 'POST', {
+          slug: name,
+          name: display,
+          ownerEmail,
+          password,
+          actor: actor(req),
+          reason: reason(req),
+        }),
+      );
     }),
   );
   router.post(
@@ -200,14 +233,12 @@ export function createPlatformRouter(deps: {
     safe(async (req, res) => {
       if (!['suspend', 'resume', 'retry', 'upgrade'].includes(String(req.params.action)))
         throw new IdentityError('PLATFORM_INVALID_INPUT', 400);
-      res
-        .status(202)
-        .json(
-          await control!.call(`/organizations/${slug(req)}/${req.params.action}`, 'POST', {
-            actor: actor(req),
-            reason: reason(req),
-          }),
-        );
+      res.status(202).json(
+        await control!.call(`/organizations/${slug(req)}/${req.params.action}`, 'POST', {
+          actor: actor(req),
+          reason: reason(req),
+        }),
+      );
     }),
   );
   router.get(

@@ -3,11 +3,12 @@ import { Button, Input } from '@librechat/client';
 import { platformPaths } from 'librechat-data-provider';
 import { usePlatform } from './queries';
 import { useLocalize } from '~/hooks';
+import Mail from './Mail';
 
 export default function Platform() {
   const localize = useLocalize();
   const [selected, setSelected] = useState('');
-  const { status, organizations, members, audit, mutation } = usePlatform(true, selected);
+  const { status, organizations, members, audit, mutation, mail } = usePlatform(true, selected);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [email, setEmail] = useState('');
@@ -62,6 +63,7 @@ export default function Platform() {
       {(status.isError ||
         organizations.isError ||
         members.isError ||
+        mail?.isError ||
         audit.isError ||
         mutation.isError) && <p role="alert">{localize('com_platform_error')}</p>}
       {saved && <p role="status">{localize('com_org_saved')}</p>}
@@ -75,6 +77,7 @@ export default function Platform() {
           placeholder={localize('com_platform_reason_hint')}
         />
       </label>
+      <Mail settings={mail?.data} busy={busy} onSave={submit} />
       <section className="border-border-light space-y-4 rounded-xl border p-4">
         <h2 className="text-lg font-semibold">{localize('com_platform_organizations')}</h2>
         {organizations.isLoading && <p role="status">{localize('com_platform_loading')}</p>}
@@ -104,18 +107,21 @@ export default function Platform() {
                       disabled={busy}
                       onClick={() => {
                         void submit(
-                          `${platformPaths.organizations}/${encodeURIComponent(organization.slug)}/${organization.status === 'active' ? 'suspend' : organization.status === 'suspended' ? 'resume' : 'retry'}`,
+                          `${platformPaths.organizations}/${encodeURIComponent(organization.slug)}/${{ active: 'suspend', suspended: 'resume', failed: 'retry', provisioning: 'retry' }[organization.status]}`,
                           'POST',
                           {},
                         );
                       }}
                     >
                       {localize(
-                        organization.status === 'active'
-                          ? 'com_platform_suspend'
-                          : organization.status === 'suspended'
-                            ? 'com_platform_resume'
-                            : 'com_platform_retry',
+                        (
+                          {
+                            active: 'com_platform_suspend',
+                            suspended: 'com_platform_resume',
+                            failed: 'com_platform_retry',
+                            provisioning: 'com_platform_retry',
+                          } as const
+                        )[organization.status],
                       )}
                     </Button>
                     {organization.status === 'active' && (

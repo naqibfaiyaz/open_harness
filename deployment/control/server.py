@@ -8,9 +8,11 @@ import socketserver
 import threading
 from http.server import BaseHTTPRequestHandler
 from engine import Engine, ControlError, ROOT
+from signup import Signup
 
 os.umask(0o077)
 engine = Engine(recover=True)
+signup = Signup(engine)
 jobs = queue.Queue(maxsize=10)
 mutation_lock = threading.RLock()
 socket_path = pathlib.Path('/run/open-harness/control.sock')
@@ -44,6 +46,18 @@ class Handler(BaseHTTPRequestHandler):
             if size < 0 or size > 16384:
                 raise ControlError('INVALID_INPUT', 400)
             body = json.loads(self.rfile.read(size)) if size else {}
+            path = self.path.strip('/').split('/')
+            if self.command == 'GET' and path == ['signup', 'config']:
+                return self.reply(200, {'enabled': signup.enabled()})
+            if self.command == 'POST' and len(path) == 2 and path[0] == 'signup':
+                if not isinstance(body, dict):
+                    raise ControlError('INVALID_INPUT', 400)
+                if path[1] == 'create' and jobs.full():
+                    raise ControlError('QUEUE_FULL', 409)
+                result = signup.call(path[1], body)
+                if result.pop('queue', False):
+                    jobs.put_nowait((result['slug'], 'create', 'self-service', 'Verified self-service signup'))
+                return self.reply(200, result)
             if self.command != 'GET':
                 if not isinstance(body, dict) or not re.fullmatch(r'[\w-]{1,100}', body.get('actor','')) or not isinstance(body.get('reason'),str) or not 8 <= len(body['reason']) <= 300:
                     raise ControlError('INVALID_INPUT', 400)
@@ -54,6 +68,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, engine.organizations())
             if self.command == 'GET' and path == ['audit']:
                 return self.reply(200, engine.audits())
+            if self.command == 'GET' and path == ['signup-settings']:
+                return self.reply(200, signup.configuration())
+            if self.command == 'POST' and path == ['signup-settings']:
+                return self.reply(200, signup.configure(body))
             if self.command == 'POST' and path == ['organizations']:
                 row = engine.create(body)
                 jobs.put_nowait((row['slug'], 'create', body['actor'], body['reason']))

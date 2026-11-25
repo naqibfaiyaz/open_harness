@@ -19,7 +19,7 @@ env['PLATFORM_CONTROL_ENABLED'] = 'true'
 env.setdefault('PLATFORM_MAX_ORGANIZATIONS', '3')
 env.setdefault('PLATFORM_BOOTSTRAP_USERS', env.get('ORGANIZATION_BOOTSTRAP_USERS',''))
 envfile.write_text('\n'.join(k+'='+v for k,v in env.items())+'\n')
-excluded = {'PLATFORM_KEYCLOAK_SECRET','KEYCLOAK_ADMIN_PASSWORD','KEYCLOAK_ADMIN_USERNAME','KEYCLOAK_DB_PASSWORD'}
+excluded = {'SIGNUP_SMTP_PASSWORD','SIGNUP_SMTP_USER','SIGNUP_SMTP_HOST','SIGNUP_EMAIL_FROM','PLATFORM_KEYCLOAK_SECRET','KEYCLOAK_ADMIN_PASSWORD','KEYCLOAK_ADMIN_USERNAME','KEYCLOAK_DB_PASSWORD'}
 (pilot/'.librechat.env').write_text('\n'.join(k+'='+v for k,v in env.items() if k not in excluded)+'\n')
 data = urllib.parse.urlencode({'grant_type':'password','client_id':'admin-cli',
     'username':env['KEYCLOAK_ADMIN_USERNAME'],'password':env['KEYCLOAK_ADMIN_PASSWORD']}).encode()

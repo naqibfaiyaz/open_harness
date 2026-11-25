@@ -13,7 +13,8 @@ type SpanAttributes = Parameters<
   NonNullable<RumOtelWebExporterOptions['onAttributesSerializing']>
 >[0];
 
-const AUTH_ROUTE = /\/(?:login|register|forgot-password|reset-password|verify|oauth)(?:\/|$)/i;
+const AUTH_ROUTE =
+  /\/(?:signup|login|register|forgot-password|reset-password|verify|oauth)(?:\/|$)/i;
 const URL_ATTRIBUTE =
   /^(?:data-)?(?:href|src|url|uri|action|formaction|poster|cite|background|data|xlink:href)$/i;
 const URL_SPAN_ATTRIBUTE = /url|uri|href|referr?er|^http\.target$|location/i;
@@ -21,6 +22,7 @@ const HEADER_SPAN_ATTRIBUTE = /^http\.(?:request|response)\.header\.(.+)$/i;
 const CREDENTIAL_HEADER = /authorization|cookie|apikey|token|signature/i;
 const BODY_SPAN_ATTRIBUTE = /^http\.(?:request|response)\.body$/i;
 const CREDENTIAL_ROUTES = [
+  /\/api\/signup(?:\/|$)/i,
   /\/api\/platform(?:\/|$)/i,
   /\/api\/organization(?:\/|$)/i,
   /\/(?:api\/hermes|hermes-workspace)(?:\/|$)/i,
@@ -65,7 +67,8 @@ export function isCredentialRequest(attributes: SpanAttributes): boolean {
 
 export function isReplayRouteAllowed(pathname: string): boolean {
   try {
-    if (/\/(?:platform|organization|hermes|hermes-workspace)(?:\/|$)/i.test(decodeURI(pathname))) return false;
+    if (/\/(?:platform|organization|hermes|hermes-workspace)(?:\/|$)/i.test(decodeURI(pathname)))
+      return false;
     return pathname !== '/' && !AUTH_ROUTE.test(decodeURI(pathname));
   } catch {
     return false;

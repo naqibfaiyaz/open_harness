@@ -1,6 +1,7 @@
 import { QueryKeys, platformPaths } from 'librechat-data-provider';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
+  SignupMailSettings,
   PlatformStatus,
   PlatformOrganization,
   PlatformAudit,
@@ -36,6 +37,11 @@ export function usePlatform(manage = false, slug?: string) {
     enabled,
     refetchInterval: enabled ? 10000 : false,
   });
+  const mail = useQuery(
+    [...key, 'mail'],
+    () => call<SignupMailSettings>('/api/platform/signup-settings'),
+    { enabled },
+  );
   const members = useQuery(
     [...key, 'members', slug],
     () =>
@@ -49,5 +55,5 @@ export function usePlatform(manage = false, slug?: string) {
       call(path, method, body),
     { onSuccess: () => cache.invalidateQueries(key) },
   );
-  return { status, organizations, audit, members, mutation };
+  return { status, organizations, audit, members, mutation, mail };
 }
