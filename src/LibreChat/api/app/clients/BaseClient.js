@@ -1242,6 +1242,7 @@ class BaseClient {
       }
     }
 
+    await this.options?.req?.hermesDeliverOutput?.(responseMessage);
     responseMessage.databasePromise = this.saveMessageToDatabase(
       responseMessage,
       saveOptions,

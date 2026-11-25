@@ -190,3 +190,4 @@ export * from './platform';
 export * from './platform/signup';
 
 export * from './organization/keys';
+export * from './hermes/deliveryStorage';

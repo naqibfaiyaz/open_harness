@@ -1125,6 +1125,8 @@ export type WorkspaceChange = {
 };
 
 export type TAttachmentMetadata = {
+  /** File imported from the conversation-scoped Hermes export directory. */
+  hermesGenerated?: boolean;
   type?: Tools;
   messageId: string;
   toolCallId: string;

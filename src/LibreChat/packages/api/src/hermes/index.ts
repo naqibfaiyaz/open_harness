@@ -18,6 +18,12 @@ export { createHermesBodyCapture, createHermesRequestSanitizer } from './body';
 import { HermesRuntime } from './runtime';
 import { generatePromptTitle, HERMES_TITLE_MODEL } from './titles';
 import { HermesProgress, observeHermesProgress } from './progress';
+import {
+  createHermesDeliveryHandler,
+  deliveryDirectory,
+  hermesPresentationInstructions,
+} from './deliveries';
+import type { HermesDeliveryStorage } from './deliveries';
 
 interface Dependencies {
   config: HermesConfig;
@@ -25,6 +31,7 @@ interface Dependencies {
   authenticate: RequestHandler;
   loadUser: (id: string) => Promise<HermesUser | undefined>;
   fetch?: typeof fetch;
+  deliveryStorage?: HermesDeliveryStorage;
 }
 type UserRequest = Request & { user?: HermesUser };
 const messages: Record<string, string> = {
@@ -64,6 +71,14 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
   };
   const dashboard = new HermesDashboard(config, secrets, deps.fetch);
   const runtime = new HermesRuntime(config, secrets, dashboard, deps.fetch);
+  const deliver = deps.deliveryStorage
+    ? createHermesDeliveryHandler({
+        dashboard,
+        config,
+        bridgeKey: secrets.bridgeKey,
+        storage: deps.deliveryStorage,
+      })
+    : undefined;
   const sessions = new WorkspaceSessions();
   const progress = new HermesProgress({
     maxRuns: config.progressMaxRuns ?? 128,
@@ -107,6 +122,8 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     res.json({
       enabled: config.enabled,
       managedOnly: config.managedOnly,
+      interactiveGraphs: !!config.interactiveGraphs,
+      deliverFiles: !!config.deliverFiles,
       canManage: canManageHermes((req as UserRequest).user, config),
       workspacePath: HERMES_PREFIX,
       scope: 'shared-trusted-workspace',
@@ -263,7 +280,22 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
       req.once('aborted', () => abort.abort());
       res.once('close', () => abort.abort());
       // Allowlist inference fields. Never accept body-level profile/provider/API-key overrides.
-      const body: Record<string, unknown> = { model: target.model, messages: req.body.messages };
+      const presentation =
+        config.interactiveGraphs || config.deliverFiles
+          ? [
+              {
+                role: 'system',
+                content: hermesPresentationInstructions(
+                  deliveryDirectory(secrets.bridgeKey, user, conversation),
+                  !!config.interactiveGraphs,
+                ),
+              },
+            ]
+          : [];
+      const body: Record<string, unknown> = {
+        model: target.model,
+        messages: [...req.body.messages, ...presentation],
+      };
       for (const key of [
         'stream',
         'temperature',
@@ -339,6 +371,12 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     }
     // The server's custom endpoint configuration chooses the provider, never a client override.
     req.body.endpointType = 'custom';
+    (req as UserRequest & { hermesDeliverOutput?: unknown }).hermesDeliverOutput = async (
+      message: Parameters<NonNullable<typeof deliver>>[1],
+    ) => {
+      const id = (req as UserRequest).user?.id ?? String((req as UserRequest).user?._id ?? '');
+      if (id && deliver) await deliver(id, message);
+    };
     // Artifacts format model output; they do not run a second tool loop.
     const requestedArtifacts = req.body?.ephemeralAgent?.artifacts;
     const defaultArtifacts = config.artifactsEnabledByDefault ? ArtifactModes.SHADCNUI : '';

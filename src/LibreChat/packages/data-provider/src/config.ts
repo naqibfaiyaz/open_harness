@@ -4811,6 +4811,10 @@ export const configSchema = z.object({
       enabled: z.boolean().default(false),
       managedOnly: z.boolean().default(true),
       artifactsEnabledByDefault: z.boolean().default(false),
+      interactiveGraphs: z.boolean().default(false),
+      deliverFiles: z.boolean().default(false),
+      deliveryMaxFiles: z.number().int().min(1).max(20).default(8),
+      deliveryMaxBytes: z.number().int().min(1024).max(26214400).default(20971520),
       publicApi: z
         .object({
           enabled: z.boolean().default(false),

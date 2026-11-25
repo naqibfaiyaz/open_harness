@@ -3,6 +3,10 @@ export interface HermesConfig {
   enabled: boolean;
   managedOnly: boolean;
   artifactsEnabledByDefault?: boolean;
+  interactiveGraphs?: boolean;
+  deliverFiles?: boolean;
+  deliveryMaxFiles?: number;
+  deliveryMaxBytes?: number;
   publicApi?: OrganizationApiConfig;
   publicOrigin: string;
   dashboardURL: string;

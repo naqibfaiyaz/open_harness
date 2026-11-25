@@ -48,6 +48,7 @@ import { useStoredSubagentHints } from '~/components/Chat/Subagents/attachments'
 import { ParallelContentRenderer, type PartWithIndex } from './ParallelContent';
 import { isPreviewedToolCallPart, PreviewedToolCallPart } from './hydration';
 import { MediaContext, MessageContext, SearchContext } from '~/Providers';
+import GeneratedFiles from '~/components/Hermes/GeneratedFiles';
 import MemoryArtifacts, { hasMemoryArtifacts } from './MemoryArtifacts';
 import { useMCPAppsPolicy } from '~/Providers/MCPAppsPolicyContext';
 import { selectToolCallUIResources } from '~/utils/mcpApps';
@@ -1645,6 +1646,7 @@ const ContentParts = memo(function ContentParts(props: ContentPartsProps) {
             </SubagentAttachmentsContext.Provider>
           </ToolDisclosureContext.Provider>
         </ReasoningDisclosureContext.Provider>
+        {!isCreatedByUser && <GeneratedFiles attachments={attachments} />}
       </MediaContext.Provider>
     </MessageContext.Provider>
   );

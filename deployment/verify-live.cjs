@@ -27,6 +27,7 @@ async function check() {
     return r.json();
   });
   if (!status.enabled || !status.canManage || !status.managedOnly) throw new Error('Hermes management is not enabled for the administrator');
+  if (!status.interactiveGraphs || !status.deliverFiles) throw new Error('Interactive artifacts and file delivery are not enabled');
   const startup = await fetch(`${url}/api/config`, { headers }).then((r) => r.json());
   if (!startup.sharedLinksEnabled || !startup.publicSharedLinksEnabled) throw new Error('Artifact conversation sharing is not enabled');
   const session = await fetch(`${url}/hermes-workspace/_session`, { method: 'POST', headers: { ...headers, Origin: publicOrigin } });

@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:integration": "node --import tsx --test tests/hermes.integration.test.ts tests/organization.test.ts tests/platform.test.ts tests/signup.test.ts tests/gallery.test.ts tests/organization-keys.test.ts",
+    "test:integration": "node --import tsx --test tests/hermes.integration.test.ts tests/organization.test.ts tests/platform.test.ts tests/signup.test.ts tests/gallery.test.ts tests/organization-keys.test.ts tests/hermes.deliveries.test.ts",
     "typecheck:integration": "node src/LibreChat/node_modules/typescript/bin/tsc -p tests/tsconfig.hermes.json",
     "capabilities": "node tools/catalog-capabilities.cjs"
   },

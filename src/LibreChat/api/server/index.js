@@ -26,6 +26,7 @@ const {
   memoryDiagnostics,
   createSecurityHeaders,
   createHermesIntegration,
+  createHermesDeliveryStorage,
   createOrganizationRouter,
   createPlatformRouter,
   createSignupRouter,
@@ -514,6 +515,7 @@ const startServer = async () => {
         },
         authenticate: require('./middleware/requireJwtAuth'),
         loadUser: loadHermesUser,
+        deliveryStorage: createHermesDeliveryStorage({ paths: require('~/config/paths'), createFile: require('~/models').createFile }),
       })
     : undefined;
   if (hermesIntegration) {

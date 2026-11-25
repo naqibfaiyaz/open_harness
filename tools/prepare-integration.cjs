@@ -10,7 +10,7 @@ if (!['http:', 'https:'].includes(publicURL.protocol) || publicURL.username || p
 const directory = path.join(root, 'deployment');
 const operators = argument('--operators', '').split(',').map((s) => s.trim()).filter(Boolean);
 const config = JSON.parse(fs.readFileSync(path.join(directory, 'librechat.yaml'), 'utf8'));
-config.hermes = { enabled: true, managedOnly: true, artifactsEnabledByDefault: true, publicApi: { enabled: true }, publicOrigin: publicURL.origin,
+config.hermes = { enabled: true, managedOnly: true, artifactsEnabledByDefault: true, interactiveGraphs: true, deliverFiles: true, publicApi: { enabled: true }, publicOrigin: publicURL.origin,
   dashboardURL: 'http://hermes:9119', runtimeURL: 'http://hermes:8642', endpointName: 'Hermes', allowedUserIds: operators };
 const environmentFile = path.join(directory, '.env');
 const identityEnv = fs.existsSync(environmentFile) ? fs.readFileSync(environmentFile, 'utf8') : '';
