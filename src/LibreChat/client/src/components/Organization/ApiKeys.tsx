@@ -16,18 +16,18 @@ export default function ApiKeys() {
     if (defaultDays) setDays(defaultDays);
   }, [defaultDays]);
   const busy = create.isLoading || revoke.isLoading;
+  const allowedModels = models
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
   const submit = async () => {
+    if (!allModels && !allowedModels.length) return;
     setCopied(false);
     try {
       const result = await create.mutateAsync({
         name,
         expiryDays: days,
-        allowedModels: allModels
-          ? []
-          : models
-              .split(',')
-              .map((value) => value.trim())
-              .filter(Boolean),
+        allowedModels: allModels ? [] : allowedModels,
       });
       setSecret(result.secret);
       create.reset();
@@ -96,7 +96,10 @@ export default function ApiKeys() {
                 />
               </label>
             )}
-            <Button type="submit" disabled={busy || !!secret}>
+            <Button
+              type="submit"
+              disabled={busy || !!secret || (!allModels && !allowedModels.length)}
+            >
               {localize('com_org_api_create')}
             </Button>
           </form>

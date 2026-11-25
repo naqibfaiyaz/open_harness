@@ -19,8 +19,21 @@ const base = {
   revoke: { mutateAsync: jest.fn() },
 };
 beforeEach(() => {
+  jest.clearAllMocks();
   hook.mockReturnValue(base);
   create.mutateAsync.mockResolvedValue({ secret: 'one-time-fixture-secret' });
+});
+it('does not turn an empty restricted model list into access to every model', async () => {
+  render(<ApiKeys />);
+  fireEvent.change(screen.getByLabelText('com_org_api_models'), { target: { value: ' , ' } });
+  const button = screen.getByRole('button', { name: 'com_org_api_create' });
+  expect(button).toBeDisabled();
+  await act(async () => {
+    fireEvent.submit(button.closest('form')!);
+  });
+  expect(create.mutateAsync).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('checkbox'));
+  expect(button).not.toBeDisabled();
 });
 it('shows the external URL and reveals a new key only until dismissed', async () => {
   render(<ApiKeys />);
