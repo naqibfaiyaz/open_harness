@@ -422,7 +422,7 @@ describe('useQueryParams', () => {
   });
 
   it('keeps the timeout alive across conversation rerenders without sending to the wrong agent', () => {
-    const hook = mountQuery({ agent_id: 'agent_test', q: 'hi', submit: 'true', projectId: 'p1' });
+    const hook = mountQuery({ agent_id: 'agent_test', q: 'hi', submit: 'true', projectId: 'p1', artifact: 'artifact-one', artifactMessage: 'message-one' });
     act(() => jest.advanceTimersByTime(1000));
     hook.updateConversation({ endpoint: EModelEndpoint.agents, agent_id: 'agent_other' });
     hook.rerender();
@@ -433,7 +433,7 @@ describe('useQueryParams', () => {
     );
     expect(hook.mockSetValue).toHaveBeenCalledTimes(1);
     const [params, options] = hook.mockSetSearchParams.mock.calls[0];
-    expect(params.toString()).toBe('projectId=p1');
+    expect(params.toString()).toBe('projectId=p1&artifact=artifact-one&artifactMessage=message-one');
     expect(options).toEqual({ replace: true });
     hook.updateConversation({ endpoint: EModelEndpoint.agents, agent_id: 'agent_test' });
     hook.rerender();

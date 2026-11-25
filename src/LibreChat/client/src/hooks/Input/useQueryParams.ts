@@ -169,6 +169,11 @@ export default function useQueryParams({
     if (projectId) {
       preservedParams.set(PROJECT_ID_SEARCH_PARAM, projectId);
     }
+    const current = new URLSearchParams(routeRef.current.search);
+    for (const key of ['artifact', 'artifactMessage']) {
+      const value = current.get(key);
+      if (value) preservedParams.set(key, value);
+    }
     return preservedParams;
   }, []);
 
