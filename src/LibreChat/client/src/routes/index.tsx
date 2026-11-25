@@ -179,6 +179,10 @@ export const router = createBrowserRouter(
                   lazy: loadSearch,
                 },
                 {
+                  path: 'artifacts',
+                  lazy: () => importWithRecovery(() => import('~/components/Artifacts/Gallery')).then((m) => ({ Component: m.default })),
+                },
+                {
                   path: 'hermes',
                   lazy: () =>
                     importWithRecovery(() => import('~/components/Hermes/HermesWorkspace')).then(

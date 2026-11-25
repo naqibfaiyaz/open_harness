@@ -1,4 +1,5 @@
 export enum QueryKeys {
+  artifactGallery = 'artifactGallery',
   signup = 'signup',
   organization = 'organization',
   platform = 'platform',

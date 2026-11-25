@@ -342,7 +342,7 @@ export function createHermesIntegration(deps: Dependencies): HermesIntegration {
     const requestedArtifacts = req.body?.ephemeralAgent?.artifacts;
     const artifacts = Object.values(ArtifactModes).includes(requestedArtifacts)
       ? requestedArtifacts
-      : '';
+      : config.artifactsEnabledByDefault ? ArtifactModes.SHADCNUI : '';
     req.body.ephemeralAgent = {
       mcp: [],
       web_search: false,

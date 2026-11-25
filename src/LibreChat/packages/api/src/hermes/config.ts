@@ -1,6 +1,7 @@
 export interface HermesConfig {
   enabled: boolean;
   managedOnly: boolean;
+  artifactsEnabledByDefault?: boolean;
   publicOrigin: string;
   dashboardURL: string;
   runtimeURL: string;

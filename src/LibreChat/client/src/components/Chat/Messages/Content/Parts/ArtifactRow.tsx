@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import { Button } from '@librechat/client';
 import {
   AppWindow,
@@ -33,6 +33,7 @@ const FALLBACK_GLYPHS: Record<ArtifactGlyph, React.ComponentType<{ className?: s
 interface ArtifactRowProps {
   /** Filename for file-backed artifacts, authored title for markdown ones. */
   title: string;
+  thumbnail?: React.ReactNode;
   kind: ArtifactRowKind;
   /** This artifact is the one the panel is currently showing. */
   isSelected: boolean;
@@ -69,9 +70,18 @@ interface ArtifactRowProps {
  * or source to read, which is what the panel does differently.
  */
 const ArtifactRow = forwardRef<HTMLButtonElement, ArtifactRowProps>(function ArtifactRow(
-  { title, kind, isSelected, onOpen, onDownload, artifactId },
+  { title, kind, isSelected, onOpen, onDownload, artifactId, thumbnail },
   ref,
 ) {
+  const linked = useRef('');
+  const wrapper = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const target = new URLSearchParams(window.location.search).get('artifact');
+    if (!target || target !== artifactId || linked.current === target) return;
+    linked.current = target;
+    if (!isSelected) onOpen();
+    wrapper.current?.scrollIntoView?.({ block: 'center', behavior: 'auto' });
+  }, [artifactId, isSelected, onOpen]);
   const localize = useLocalize();
   const actionLabel = isSelected
     ? localize('com_ui_click_to_close')
@@ -84,60 +94,75 @@ const ArtifactRow = forwardRef<HTMLButtonElement, ArtifactRowProps>(function Art
   }
 
   return (
-    <div className={cn(TOOL_ROW_CLASSES, 'text-text-secondary text-sm', ARTIFACT_ROW_NAV_SPACING)}>
-      <Button
-        ref={ref}
-        type="button"
-        variant="disclosure"
-        aria-controls="artifact-viewer"
-        aria-expanded={isSelected}
-        data-artifact-trigger={artifactId}
-        onClick={onOpen}
+    <div ref={wrapper} className="space-y-2">
+      <div
         className={cn(
-          'min-w-0 flex-1 gap-2.5',
-          'hover:text-text-primary focus-visible:ring-text-primary focus-visible:ring-offset-0',
-          isSelected && 'text-text-primary',
+          TOOL_ROW_CLASSES,
+          'text-text-secondary text-sm',
+          ARTIFACT_ROW_NAV_SPACING,
+          thumbnail && 'h-auto',
         )}
       >
-        <span
-          className={cn(ROW_GLYPH_SLOT, kind.rendersPreview && 'text-status-info')}
-          aria-hidden="true"
+        <Button
+          ref={ref}
+          type="button"
+          variant="disclosure"
+          aria-controls="artifact-viewer"
+          aria-expanded={isSelected}
+          data-artifact-trigger={artifactId}
+          onClick={onOpen}
+          className={cn(
+            'min-w-0 flex-1 gap-2.5',
+            thumbnail && 'flex-wrap',
+            'hover:text-text-primary focus-visible:ring-text-primary focus-visible:ring-offset-0',
+            isSelected && 'text-text-primary',
+          )}
         >
-          {glyph}
-        </span>
-        <span className="min-w-0 truncate font-medium" title={title}>
-          {title}
-        </span>
-        {/* No vertical padding: `TOOL_ROW_CLASSES` fixes the row at 20px so
+          <span
+            className={cn(ROW_GLYPH_SLOT, kind.rendersPreview && 'text-status-info')}
+            aria-hidden="true"
+          >
+            {glyph}
+          </span>
+          <span className="min-w-0 truncate font-medium" title={title}>
+            {title}
+          </span>
+          {/* No vertical padding: `TOOL_ROW_CLASSES` fixes the row at 20px so
             the streaming cursor and a call header can trade places without
             moving what is under them, and a taller child here would push
             past that box. */}
-        <span className="text-text-tertiary ring-border-light text-3xs shrink-0 rounded px-1.5 leading-5 font-medium tracking-wide uppercase ring-1 ring-inset">
-          {label}
-        </span>
-        {/* The glyph's tint is the visual half of the preview/source split
+          <span className="text-text-tertiary ring-border-light text-3xs shrink-0 rounded px-1.5 leading-5 font-medium tracking-wide uppercase ring-1 ring-inset">
+            {label}
+          </span>
+          {/* The glyph's tint is the visual half of the preview/source split
             and reaches nobody using a screen reader, so the same fact is
             folded into the button's accessible name. */}
-        <span className="sr-only">
-          {`${
-            kind.rendersPreview
-              ? localize('com_ui_artifact_renders')
-              : localize('com_ui_artifact_source')
-          } ${actionLabel}`}
-        </span>
-      </Button>
-      {onDownload != null && (
-        <Button
-          type="button"
-          variant="quiet"
-          size="icon"
-          onClick={onDownload}
-          aria-label={`${localize('com_ui_download')} ${title}`}
-          className="size-5 shrink-0 rounded focus-visible:ring-offset-0"
-        >
-          <Download className="size-4" aria-hidden="true" />
+          <span className="sr-only">
+            {`${
+              kind.rendersPreview
+                ? localize('com_ui_artifact_renders')
+                : localize('com_ui_artifact_source')
+            } ${actionLabel}`}
+          </span>
+          {thumbnail && (
+            <div className="w-full basis-full">
+              <div className="max-w-sm">{thumbnail}</div>
+            </div>
+          )}
         </Button>
-      )}
+        {onDownload != null && (
+          <Button
+            type="button"
+            variant="quiet"
+            size="icon"
+            onClick={onDownload}
+            aria-label={`${localize('com_ui_download')} ${title}`}
+            className="size-5 shrink-0 rounded focus-visible:ring-offset-0"
+          >
+            <Download className="size-4" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 });

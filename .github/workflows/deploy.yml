@@ -49,8 +49,9 @@ jobs:
           node ../../node_modules/jest/bin/jest.js --config jest.config.mjs --runInBand src/utils/env.spec.ts --coverage=false
           cd ../data-schemas
           node ../../node_modules/jest/bin/jest.js --config jest.config.mjs --runInBand src/methods/user.methods.spec.ts --testNamePattern='links a local organization' --coverage=false
+          node ../../node_modules/jest/bin/jest.js --config jest.config.mjs --runInBand src/methods/message.gallery.spec.ts --coverage=false
           cd ../../client
-          node ../node_modules/jest/bin/jest.js --config jest.config.cjs --runInBand src/components/Platform/Mail.spec.tsx src/components/Platform/Signup.spec.tsx src/components/Platform/index.spec.tsx src/components/Organization/index.spec.tsx src/components/Hermes/HermesWorkspace.spec.tsx src/components/Hermes/theme.spec.ts src/components/Hermes/Progress.spec.tsx src/components/Chat/__tests__/ChatView.spec.tsx src/components/UnifiedSidebar/__tests__/ExpandedPanel.spec.tsx src/components/Share/ShareView.spec.tsx src/components/Share/ShareView.highlight.spec.tsx src/utils/__tests__/artifacts.test.ts src/lib/rum/privacy.spec.ts --coverage=false
+          node ../node_modules/jest/bin/jest.js --config jest.config.cjs --runInBand src/components/Artifacts/Gallery.spec.tsx src/components/Artifacts/Thumbnail.spec.tsx src/components/Chat/Messages/Content/Parts/__tests__/ArtifactRouting.test.tsx src/components/Platform/Mail.spec.tsx src/components/Platform/Signup.spec.tsx src/components/Platform/index.spec.tsx src/components/Organization/index.spec.tsx src/components/Hermes/HermesWorkspace.spec.tsx src/components/Hermes/theme.spec.ts src/components/Hermes/Progress.spec.tsx src/components/Chat/__tests__/ChatView.spec.tsx src/components/UnifiedSidebar/__tests__/ExpandedPanel.spec.tsx src/components/Share/ShareView.spec.tsx src/components/Share/ShareView.highlight.spec.tsx src/utils/__tests__/artifacts.test.ts src/lib/rum/privacy.spec.ts --coverage=false
       - name: Validate rollout scripts
         run: |
           bash -n deployment/deploy-release.sh

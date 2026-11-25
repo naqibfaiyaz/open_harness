@@ -29,6 +29,7 @@ const {
   createOrganizationRouter,
   createPlatformRouter,
   createSignupRouter,
+  createArtifactGalleryRouter,
   organizationUserLoader,
   createHermesBodyCapture,
   createHermesRequestSanitizer,
@@ -84,6 +85,7 @@ const {
   updateAccessPermissions,
   sweepOrphanedPreviews,
   getRoleByName,
+  getArtifactGalleryMessages,
   getUserById,
   linkOrganizationIdentity,
   seedDatabase,
@@ -314,6 +316,7 @@ const startServer = async () => {
     await updateInterfacePermissions({
       appConfig,
       getRoleByName,
+  getArtifactGalleryMessages,
       updateAccessPermissions,
       recordAuditEntry,
     });
@@ -468,6 +471,10 @@ const startServer = async () => {
 
   // Hermes remains the resource and execution owner. Legacy code only wires the TS integration.
   const hermesConfig = appConfig.config?.hermes;
+  app.use('/api/artifact-gallery', createArtifactGalleryRouter({
+    authenticate: require('./middleware/requireJwtAuth'),
+    list: getArtifactGalleryMessages,
+  }));
   app.use('/api/signup', createSignupRouter({
     config: appConfig.config?.platform,
     controlSecret: process.env.PLATFORM_CONTROL_KEY ?? '',

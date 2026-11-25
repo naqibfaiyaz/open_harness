@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useStore } from 'jotai';
 import { useLocation } from 'react-router-dom';
 import { Constants, QueryKeys, dataService } from 'librechat-data-provider';
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +18,8 @@ import {
   isNotFoundError,
   logger,
 } from '~/utils';
+import { siblingIdxFamily, siblingKey } from '~/components/Chat/Messages/Thread/state';
+import { getBranchSiblingIndexesForTarget } from '~/utils/messages';
 
 type StableMessagesParams = {
   pathname: string;
@@ -290,6 +293,8 @@ export const useGetMessagesByConvoId = <TData = t.TMessage[]>(
 ): QueryObserverResult<TData> => {
   const location = useLocation();
   const queryClient = useQueryClient();
+  const jotaiStore = useStore();
+  const artifactSelection = useRef('');
   const isStreaming = options?.isStreaming === true;
   const isStreamingRef = useRef(isStreaming);
 
@@ -312,6 +317,22 @@ export const useGetMessagesByConvoId = <TData = t.TMessage[]>(
       ...config,
     },
   );
+
+  useEffect(() => {
+    const target = new URLSearchParams(location.search).get('artifactMessage');
+    const key = `${id}:${target ?? ''}`;
+    if (!target) {
+      artifactSelection.current = '';
+      return;
+    }
+    if (artifactSelection.current === key) return;
+    const messages = queryClient.getQueryData<t.TMessage[]>([QueryKeys.messages, id]);
+    if (!messages?.some((message) => message.messageId === target)) return;
+    artifactSelection.current = key;
+    for (const selection of getBranchSiblingIndexesForTarget(messages, target, id)) {
+      jotaiStore.set(siblingIdxFamily(siblingKey(selection.parentMessageId)), selection.siblingIdx);
+    }
+  }, [id, location.search, query.dataUpdatedAt, queryClient, jotaiStore]);
 
   /** Only the observer that consults the prefetch clears its mark, and only after it subscribed:
    *  other observers of this key never refetch on mount, and mount as children of the view, so

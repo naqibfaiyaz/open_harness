@@ -4198,5 +4198,14 @@
   "com_signup_smtp_password": "SMTP password (leave blank to keep existing)",
   "com_signup_secret_saved": "A password is stored. Leave the password field blank to keep it.",
   "com_signup_save": "Save signup settings",
-  "com_signup_view": "View signup page"
+  "com_signup_view": "View signup page",
+  "com_gallery_title": "Artifact gallery",
+  "com_gallery_scope": "Artifacts saved in your chats. Search by title or source content, then open an artifact in its original conversation.",
+  "com_gallery_search": "Search artifacts",
+  "com_gallery_preview": "Artifact preview",
+  "com_gallery_open": "Open chat and artifact",
+  "com_gallery_empty": "No matching artifacts found.",
+  "com_gallery_error": "Artifacts could not be loaded. Please try again.",
+  "com_gallery_retry": "Try again",
+  "com_gallery_more": "Load more"
 }

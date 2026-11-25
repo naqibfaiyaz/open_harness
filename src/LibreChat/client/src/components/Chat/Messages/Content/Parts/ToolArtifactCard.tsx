@@ -3,6 +3,7 @@ import type { TAttachment, TFile, TAttachmentMetadata } from 'librechat-data-pro
 import type { Artifact } from '~/common';
 import { useMessagePartsHost } from '~/Providers/MessagePartsHostContext';
 import { artifactRowKind, isCodeOnlyArtifact } from '~/utils/artifacts';
+import Thumbnail from '~/components/Artifacts/Thumbnail';
 import { displayFilename } from './attachmentTypes';
 import { useAttachmentLink } from './LogLink';
 import ArtifactRow from './ArtifactRow';
@@ -191,6 +192,7 @@ const ToolArtifactCard = memo(({ attachment, artifact }: ToolArtifactCardProps) 
       onOpen={handleOpen}
       onDownload={handleDownload}
       artifactId={artifact.id}
+      thumbnail={<Thumbnail content={artifact.content} type={artifact.type} title={visibleTitle} />}
     />
   );
 });

@@ -11,6 +11,7 @@ import useDirection, { inlineSide } from '~/hooks/Nav/useDirection';
 import HermesButton from '~/components/Hermes/HermesButton';
 import OrganizationButton from '~/components/Organization/Button';
 import PlatformButton from '~/components/Platform/Button';
+import GalleryButton from '~/components/Artifacts/GalleryButton';
 import useNewChat from '~/hooks/Conversations/useNewChat';
 import { lazyWithRecovery } from '~/lib/assets/lazy';
 import { useLocalize } from '~/hooks';
@@ -202,6 +203,7 @@ function ExpandedPanel({
       <HermesButton onNavigate={onExpand} />
       <OrganizationButton />
       <PlatformButton />
+      <GalleryButton />
 
       <div className="mt-auto">
         <Suspense fallback={<Skeleton className="h-9 w-9 rounded-lg" />}>

@@ -6,6 +6,7 @@ import {
 } from 'librechat-data-provider';
 import type { ClientSession, DeleteResult, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import type { UserSubmittedMessageFieldPath } from 'librechat-data-provider';
+import type { GalleryPage, GalleryMessage } from 'librechat-data-provider';
 import type { SearchParams } from 'meilisearch';
 import type { SchemaWithMeiliMethods } from '~/models/plugins/mongoMeili';
 import type { ISubagentContentChunk } from '~/models/subagentContent';
@@ -935,6 +936,7 @@ export interface MessageMethods {
     kind: 'manual' | 'wakeup';
     claimId: string;
   }): Promise<boolean>;
+  getArtifactGalleryMessages(user: string, before?: string, query?: string): Promise<GalleryPage>;
   getMessages(
     filter: FilterQuery<IMessage>,
     select?: string,
@@ -3036,6 +3038,32 @@ export function createMessageMethods(
   /**
    * Retrieves messages from the database.
    */
+  async function getArtifactGalleryMessages(user: string, before?: string, query = ''): Promise<GalleryPage> {
+    const Message = mongoose.models.Message as Model<IMessage>;
+    const clauses: FilterQuery<IMessage>[] = [
+      { $or: [{ text: /:::artifact/ }, { 'content.text': /:::artifact/ }, { 'attachments.file_id': { $exists: true } }] },
+      activeExpirationFilter(),
+    ];
+    if (before) clauses.push({ _id: { $lt: new mongoose.Types.ObjectId(before) } });
+    if (query) {
+      const literal = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      clauses.push({ $or: [{ text: literal }, { 'content.text': literal }, { 'attachments.filename': literal }, { 'attachments.text': literal }] });
+    }
+    const rows = await Message.find({ user, isCreatedByUser: false, $and: clauses })
+      .select('messageId conversationId text content attachments').sort({ _id: -1 }).limit(21).lean();
+    const selected = rows.slice(0, 20);
+    const messages: GalleryMessage[] = selected.map((row) => ({
+      messageId: row.messageId, conversationId: row.conversationId,
+      text: typeof row.text === 'string' ? row.text : undefined,
+      attachments: row.attachments?.flatMap((attachment) => {
+        if (!attachment || typeof attachment !== 'object' || !('file_id' in attachment) || typeof attachment.file_id !== 'string' || !('filename' in attachment) || typeof attachment.filename !== 'string') return [];
+        return [{ file_id: attachment.file_id, filename: attachment.filename, content: 'text' in attachment && typeof attachment.text === 'string' ? attachment.text : '' }];
+      }),
+      content: row.content?.flatMap((part) => part && typeof part === 'object' && 'type' in part && part.type === 'text' && 'text' in part && typeof part.text === 'string' ? [{ type: 'text', text: part.text }] : []),
+    }));
+    return { messages, nextCursor: rows.length > 20 ? String(selected[selected.length - 1]._id) : undefined };
+  }
+
   async function getMessages(
     filter: FilterQuery<IMessage>,
     select?: string,
@@ -4489,6 +4517,7 @@ export function createMessageMethods(
     claimSubagentTaskResult,
     releaseSubagentTaskResultClaim,
     getMessages,
+    getArtifactGalleryMessages,
     getConversationTraceRefs,
     hasSampledTraceMessage,
     getMessagesForSubagentThreadView,

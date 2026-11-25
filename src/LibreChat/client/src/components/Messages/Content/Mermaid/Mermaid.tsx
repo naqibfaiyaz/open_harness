@@ -6,6 +6,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import type { ProcessedMermaidSvg } from '~/utils/diagram/export';
 import ArtifactRow from '~/components/Chat/Messages/Content/Parts/ArtifactRow';
 import { MERMAID_ARTIFACT_TYPE, type Artifact } from '~/common/artifacts';
+import Thumbnail from '~/components/Artifacts/Thumbnail';
 import { artifactRowKind } from '~/utils/artifacts';
 import useSvgProcessing from './useSvgProcessing';
 import { useMessageContext } from '~/Providers';
@@ -131,6 +132,14 @@ const Mermaid: React.FC<MermaidProps> = memo((props) => {
     openArtifact();
   }, [openArtifact]);
 
+  const galleryLink = useRef('');
+  useEffect(() => {
+    const target = new URLSearchParams(window.location.search).get('artifact');
+    if (!canOpenArtifact || target !== artifact.id || galleryLink.current === target) return;
+    galleryLink.current = target;
+    handleExpand();
+  }, [artifact.id, canOpenArtifact, handleExpand]);
+
   const handleArtifactClick = useCallback(() => {
     if (!isSelected) {
       openArtifact();
@@ -174,6 +183,9 @@ const Mermaid: React.FC<MermaidProps> = memo((props) => {
       <ArtifactRow
         ref={artifactButtonRef}
         artifactId={artifact.id}
+        thumbnail={
+          <Thumbnail content={artifact.content} type={artifact.type} title={artifact.title} />
+        }
         title={rowTitle ?? artifact.title ?? defaultTitle}
         kind={artifactRowKind(artifact)}
         isSelected={isSelected}

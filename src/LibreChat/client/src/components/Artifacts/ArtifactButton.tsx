@@ -6,6 +6,7 @@ import type { Artifact } from '~/common';
 import ArtifactRow from '~/components/Chat/Messages/Content/Parts/ArtifactRow';
 import { artifactRowKind } from '~/utils/artifacts';
 import { logger, isArtifactRoute } from '~/utils';
+import Thumbnail from './Thumbnail';
 import store from '~/store';
 
 const ArtifactButton = ({ artifact }: { artifact: Artifact | null }) => {
@@ -76,6 +77,9 @@ const ArtifactButton = ({ artifact }: { artifact: Artifact | null }) => {
       isSelected={isSelected}
       onOpen={handleOpen}
       artifactId={artifact.id}
+      thumbnail={
+        <Thumbnail content={artifact.content} type={artifact.type} title={artifact.title} />
+      }
     />
   );
 };

@@ -124,3 +124,5 @@ export * from './codeSetup';
 export * from './hermes';
 export * from './organization';
 export * from './platform';
+
+export * from './gallery';

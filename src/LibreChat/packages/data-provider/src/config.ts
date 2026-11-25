@@ -4810,6 +4810,7 @@ export const configSchema = z.object({
     .object({
       enabled: z.boolean().default(false),
       managedOnly: z.boolean().default(true),
+      artifactsEnabledByDefault: z.boolean().default(false),
       publicOrigin: z.string().url(),
       dashboardURL: z.string().url().default('http://hermes:9119'),
       runtimeURL: z.string().url().default('http://hermes:8642'),
